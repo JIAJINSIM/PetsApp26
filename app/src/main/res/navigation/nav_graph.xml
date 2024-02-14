@@ -1,0 +1,12 @@
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <composable
+        android:id="@+id/mainScreen"
+        android:label="Main" />
+
+    <composable
+        android:id="@+id/registerUserScreen"
+        android:label="Register" />
+</navigation>

@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+
+    android:layout_height="match_parent"
+
+    android:background="@color/teal_200"
+
+    tools:context=".RegisterUser">
+
+    <LinearLayout
+
+        android:layout_width="match_parent"
+
+        android:layout_height="match_parent"
+
+        android:orientation="vertical"
+
+        android:layout_marginLeft="40dp"
+
+        android:layout_marginRight="40dp"
+
+        android:layout_marginTop="15dp">
+
+
+
+        <TextView
+
+            android:layout_width="wrap_content"
+
+            android:layout_height="wrap_content"
+
+            android:text="Enter Details to Create Account"
+
+            android:textColor="#000"
+
+            android:textSize="25dp"
+
+            android:id="@+id/textdisplay"
+
+            app:layout_constraintBottom_toBottomOf="parent"
+
+            app:layout_constraintLeft_toLeftOf="parent"
+
+            app:layout_constraintRight_toRightOf="parent"
+
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="30dp"
+
+            android:textSize="20dp"
+
+            android:textColor="#000"
+
+            android:id="@+id/firstnametextview"
+
+            android:text="Enter First Name">
+
+        </TextView>
+
+        <EditText
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="15dp"
+
+            android:hint="Enter first name here"
+
+            android:id="@+id/firstname">
+
+        </EditText>
+
+        <TextView
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="30dp"
+
+            android:textSize="20dp"
+
+            android:textColor="#000"
+
+            android:id="@+id/lastnametextview"
+
+            android:text="Enter Last Name">
+
+        </TextView>
+
+        <EditText
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="15dp"
+
+            android:hint="Enter last name here"
+
+            android:id="@+id/lastname">
+
+        </EditText>
+
+        <TextView
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="30dp"
+
+            android:textSize="20dp"
+
+            android:textColor="#000"
+
+            android:id="@+id/emailtextview"
+
+            android:text="Enter Last Name">
+
+        </TextView>
+
+        <EditText
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="15dp"
+
+            android:hint="Enter email here"
+
+            android:inputType="textEmailAddress"
+
+            android:id="@+id/email">
+
+        </EditText>
+
+        <TextView
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="30dp"
+
+            android:textSize="20dp"
+
+            android:textColor="#000"
+
+            android:id="@+id/usernametextview"
+
+            android:text="Enter Username">
+
+        </TextView>
+
+        <EditText
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="15dp"
+
+            android:hint="Enter username here"
+
+            android:id="@+id/username">
+
+        </EditText>
+
+        <TextView
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="30dp"
+
+            android:textSize="20dp"
+
+            android:textColor="#000"
+
+            android:id="@+id/passwordtextview"
+
+            android:text="Enter Password">
+
+        </TextView>
+
+        <EditText
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="15dp"
+
+            android:inputType="textPassword"
+
+            android:hint="Enter password here"
+
+            android:id="@+id/password">
+
+        </EditText>
+
+        <Button
+
+            android:layout_width="match_parent"
+
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="10dp"
+
+            android:id="@+id/registerbutton"
+
+            android:text="Create Account">
+
+        </Button>
+
+
+
+    </LinearLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

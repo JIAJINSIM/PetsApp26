@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "396452097196",
+    "project_id": "petsapp-26",
+    "storage_bucket": "petsapp-26.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:396452097196:android:f4d178dc20da9149468309",
+        "android_client_info": {
+          "package_name": "com.example.petsapp26"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDbzfKk6MtJvOib3IqdeWZOyovDv0VEyOw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
