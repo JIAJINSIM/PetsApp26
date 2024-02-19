@@ -84,6 +84,7 @@ class Login : Fragment() {
         val mainActivity = activity as? MainActivity
         mainActivity?.enableNavigationDrawer()
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

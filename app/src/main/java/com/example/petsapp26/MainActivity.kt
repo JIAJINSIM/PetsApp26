@@ -42,6 +42,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var toggle: ActionBarDrawerToggle
+    private lateinit var toolbar: Toolbar // Define toolbar variable
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,7 +51,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         drawerLayout = findViewById(R.id.drawer_layout)
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
         navigationView.setNavigationItemSelectedListener(this)
@@ -73,12 +74,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
 
-    private fun disableNavigationDrawer() {
+    fun disableNavigationDrawer() {
+        val toggle = ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.open_nav, R.string.close_nav)
+        drawerLayout.addDrawerListener(toggle)
+        toggle.syncState()
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-        // Hide the navigation icon
-        //toggle.isDrawerIndicatorEnabled = false
-        //supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        toggle.isDrawerIndicatorEnabled = false
+        supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
+
 
     fun enableNavigationDrawer() {
         drawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED)
@@ -168,8 +172,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .replace(R.id.fragment_container, ShareFragment()).commit()
             R.id.nav_about -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, AboutFragment()).commit()
-            R.id.nav_logout -> Toast.makeText(this, "Logout!", Toast.LENGTH_SHORT).show()
-
+            R.id.nav_logout -> {
+                Toast.makeText(this, "Logout!", Toast.LENGTH_SHORT).show()
+                disableNavigationDrawer() // Disable navigation drawer after logout
+                // Replace the fragment with the login fragment
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, Login())
+                    .commit()
+            }
         }
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
