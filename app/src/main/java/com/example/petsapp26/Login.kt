@@ -1,6 +1,5 @@
 package com.example.petsapp26
 
-import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -70,9 +69,10 @@ class Login : Fragment() {
                         // Role check
                         firestore.collection("users").document(username).get().addOnSuccessListener { document ->
                             val role = document.getString("role")
-                            if (role == "admin") {
-                                enableNavigationDrawer()
-                            }
+
+                            updateNavigationView(role)
+                            enableNavigationDrawer()
+
                         }
                         return@addOnSuccessListener
                     }
@@ -90,6 +90,11 @@ class Login : Fragment() {
     private fun enableNavigationDrawer() {
         val mainActivity = activity as? MainActivity
         mainActivity?.enableNavigationDrawer()
+    }
+
+    private fun updateNavigationView(userRole: String?) {
+        val mainActivity = activity as? MainActivity
+        mainActivity?.updateNavigationView(userRole)
     }
 
     override fun onDestroyView() {

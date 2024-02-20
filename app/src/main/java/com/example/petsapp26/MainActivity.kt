@@ -1,40 +1,16 @@
 package com.example.petsapp26
 
 import android.os.Bundle
-import android.util.Log
-import android.view.LayoutInflater
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import com.google.firebase.firestore.FirebaseFirestore
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.google.android.material.navigation.NavigationView
 
 import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.view.Window
-import android.widget.Button
-import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
-import androidx.fragment.app.Fragment
-import com.example.petsapp26.databinding.ActivityMainBinding
-import com.example.petsapp26.databinding.FragmentLoginBinding
-
-
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
@@ -70,6 +46,38 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             navigationView.setCheckedItem(R.id.nav_login)
         }
     }
+
+
+//    private fun fetchUserRole() {
+//        val userId =  // method to get current user's ID
+//            firestore.collection("users").document(userId).get()
+//                .addOnSuccessListener { documentSnapshot ->
+//                    val userRole = documentSnapshot.getString("role") ?: "user" // default to "user" if not found
+//                    updateNavigationView(userRole)
+//                }
+//                .addOnFailureListener { e ->
+//                    Log.e("MainActivity", "Error fetching user role", e)
+//                }
+//    }
+
+    fun updateNavigationView(userRole: String?) {
+        val navigationView = findViewById<NavigationView>(R.id.nav_view)
+        navigationView.menu.clear() // Clear existing items
+
+        when (userRole) {
+            "admin" -> {
+                navigationView.inflateMenu(R.menu.nav_menu_admin) // load admin menu
+            }
+            "user" -> {
+                navigationView.inflateMenu(R.menu.nav_menu_user) // load user menu
+            }
+            else -> {
+                // Handle other roles or default case
+                navigationView.inflateMenu(R.menu.nav_menu_user) // default to user menu
+            }
+        }
+    }
+
 
 
 
