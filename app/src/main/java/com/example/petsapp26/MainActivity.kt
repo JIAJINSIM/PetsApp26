@@ -1,5 +1,6 @@
 package com.example.petsapp26
 
+import android.content.Context
 import android.os.Bundle
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.navigation.NavigationView
@@ -27,6 +28,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         drawerLayout = findViewById(R.id.drawer_layout)
+
+        val userRole = getUserRole() // Retrieve the user's role
+        updateNavigationView(userRole) // Update the navigation view based on the role
+
         toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
@@ -73,11 +78,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             else -> {
                 // Handle other roles or default case
-                navigationView.inflateMenu(R.menu.nav_menu_user) // default to user menu
+                navigationView.inflateMenu(R.menu.nav_menu_admin) // default to user menu
             }
         }
     }
 
+    private fun getUserRole(): String {
+        val preferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        return preferences.getString("userRole", "user") ?: "user" // Default to "user"
+    }
 
 
 
