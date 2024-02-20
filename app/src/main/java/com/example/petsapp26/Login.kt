@@ -54,6 +54,7 @@ class Login : Fragment() {
         }
     }
 
+    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private fun login(username: String, password: String) {
         val db = FirebaseFirestore.getInstance()
         db.collection("users")
@@ -66,7 +67,13 @@ class Login : Fragment() {
                         // Passwords match, login successful
                         // Navigate to the next screen or perform desired action
                         Toast.makeText(requireContext(), "Login Successful!", Toast.LENGTH_SHORT).show()
-                        enableNavigationDrawer()
+                        // Role check
+                        firestore.collection("users").document(username).get().addOnSuccessListener { document ->
+                            val role = document.getString("role")
+                            if (role == "admin") {
+                                enableNavigationDrawer()
+                            }
+                        }
                         return@addOnSuccessListener
                     }
                 }
