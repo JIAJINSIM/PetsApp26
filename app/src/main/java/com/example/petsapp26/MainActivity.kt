@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.FragmentManager
+import com.google.firebase.auth.FirebaseAuth
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
@@ -190,12 +192,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_about -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, AboutFragment()).commit()
             R.id.nav_logout -> {
-                Toast.makeText(this, "Logout!", Toast.LENGTH_SHORT).show()
-                disableNavigationDrawer() // Disable navigation drawer after logout
+                // Sign out from Firebase Authentication
+                FirebaseAuth.getInstance().signOut()
+
+                // Clear any saved user data (e.g., SharedPreferences)
+                val sharedPreferences = getSharedPreferences("YourSharedPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().clear().apply()
+
+                // Display logout message
+                Toast.makeText(this, "Logged out!", Toast.LENGTH_SHORT).show()
+
+                // Disable navigation drawer
+                disableNavigationDrawer()
+
                 // Replace the fragment with the login fragment
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, Login())
                     .commit()
+
+                // Clear back stack to prevent going back to the secured fragments
+                supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
         }
         drawerLayout.closeDrawer(GravityCompat.START)
