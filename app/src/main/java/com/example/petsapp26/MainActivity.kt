@@ -1,5 +1,6 @@
 package com.example.petsapp26
 
+import android.content.Context
 import android.os.Bundle
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.navigation.NavigationView
@@ -11,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
+import androidx.fragment.app.FragmentManager
+import com.google.firebase.auth.FirebaseAuth
 
 
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener{
@@ -27,6 +30,10 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         drawerLayout = findViewById(R.id.drawer_layout)
+
+        val userRole = getUserRole() // Retrieve the user's role
+        updateNavigationView(userRole) // Update the navigation view based on the role
+
         toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
@@ -73,11 +80,15 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             else -> {
                 // Handle other roles or default case
-                navigationView.inflateMenu(R.menu.nav_menu_user) // default to user menu
+                navigationView.inflateMenu(R.menu.nav_menu_admin) // default to user menu
             }
         }
     }
 
+    private fun getUserRole(): String {
+        val preferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        return preferences.getString("userRole", "user") ?: "user" // Default to "user"
+    }
 
 
 
@@ -181,12 +192,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_about -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, AboutFragment()).commit()
             R.id.nav_logout -> {
-                Toast.makeText(this, "Logout!", Toast.LENGTH_SHORT).show()
-                disableNavigationDrawer() // Disable navigation drawer after logout
+                // Sign out from Firebase Authentication
+                FirebaseAuth.getInstance().signOut()
+
+                // Clear any saved user data (e.g., SharedPreferences)
+                val sharedPreferences = getSharedPreferences("YourSharedPrefs", Context.MODE_PRIVATE)
+                sharedPreferences.edit().clear().apply()
+
+                // Display logout message
+                Toast.makeText(this, "Logged out!", Toast.LENGTH_SHORT).show()
+
+                // Disable navigation drawer
+                disableNavigationDrawer()
+
                 // Replace the fragment with the login fragment
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.fragment_container, Login())
                     .commit()
+
+                // Clear back stack to prevent going back to the secured fragments
+                supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
             }
         }
         drawerLayout.closeDrawer(GravityCompat.START)

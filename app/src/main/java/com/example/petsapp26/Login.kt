@@ -1,16 +1,13 @@
 package com.example.petsapp26
 
 import android.content.Intent
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-
-
-
-
 
 import com.example.petsapp26.databinding.FragmentLoginBinding
 import com.google.firebase.firestore.FirebaseFirestore
@@ -67,34 +64,25 @@ class Login : Fragment() {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private fun login(username: String, password: String) {
-        val db = FirebaseFirestore.getInstance()
-        db.collection("users")
+        firestore.collection("users")
             .whereEqualTo("username", username)
             .get()
             .addOnSuccessListener { documents ->
                 for (document in documents) {
                     val storedPassword = document.getString("password")
                     if (storedPassword == password) {
-                        // Passwords match, login successful
-                        // Navigate to the next screen or perform desired action
+                        // Login successful
                         Toast.makeText(requireContext(), "Login Successful!", Toast.LENGTH_SHORT).show()
-                        // Role check
-                        firestore.collection("users").document(username).get().addOnSuccessListener { document ->
-                            val role = document.getString("role")
-
-                            updateNavigationView(role)
-                            enableNavigationDrawer()
-
-                        }
+                        val role = document.getString("role") ?: "user" // Default to "user" if null
+                        storeUserRole(role) // Store the role
+                        updateNavigationView(role)
+                        enableNavigationDrawer()
                         return@addOnSuccessListener
                     }
                 }
-                // No user found with the provided username or incorrect password
-                // Handle login failure
                 Toast.makeText(requireContext(), "Login Failed!", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { exception ->
-                // Handle errors
                 Toast.makeText(requireContext(), "Login Error: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }
@@ -107,6 +95,14 @@ class Login : Fragment() {
 //                ?.commit()
 //        }
 //    }
+
+
+    private fun storeUserRole(role: String) {
+        activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)?.edit()?.apply {
+            putString("userRole", role)
+            apply()
+        }
+    }
 
 
     private fun enableNavigationDrawer() {
