@@ -1,5 +1,6 @@
 package com.example.petsapp26
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -45,12 +46,23 @@ class Login : Fragment() {
         val usernameEditText = binding.username
         val passwordEditText = binding.password
         val loginButton = binding.login
+        val registerLink = binding.registerLink
 
         loginButton.setOnClickListener {
             val username = usernameEditText.text.toString()
             val password = passwordEditText.text.toString()
             login(username, password)
         }
+
+        registerLink.setOnClickListener {
+            // Perform fragment transaction to show RegisterUser fragment
+            fragmentManager?.beginTransaction()
+                ?.replace(R.id.fragment_container, RegisterUser())
+                ?.addToBackStack(null)
+                ?.commit()
+        }
+
+
     }
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -86,11 +98,23 @@ class Login : Fragment() {
                 Toast.makeText(requireContext(), "Login Error: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }
+//    fun onRegisterLinkClick(view: View) {
+//        // Check if we are attached to an activity, as we need the fragmentManager from it
+//        if (isAdded) {
+//            activity?.supportFragmentManager?.beginTransaction()
+//                ?.replace(R.id.fragment_container, RegisterUser())
+//                ?.addToBackStack(null) // Add this transaction to the back stack
+//                ?.commit()
+//        }
+//    }
+
 
     private fun enableNavigationDrawer() {
         val mainActivity = activity as? MainActivity
         mainActivity?.enableNavigationDrawer()
     }
+
+
 
     private fun updateNavigationView(userRole: String?) {
         val mainActivity = activity as? MainActivity
