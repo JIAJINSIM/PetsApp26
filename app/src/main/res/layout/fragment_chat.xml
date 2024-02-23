@@ -1,16 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".Chat">
-    <!-- TODO: Update blank fragment layout -->
+
+    <!-- RecyclerView for displaying messages -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/inputLayout"
+        android:padding="8dp" />
+
+    <!-- Input layout for composing and sending messages (if any) -->
+    <!-- You can replace this with your actual input layout -->
+    <RelativeLayout
+        android:id="@+id/inputLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:padding="8dp">
+
+        <!-- Your input views (e.g., EditText, Button) go here -->
+        <!-- For example: -->
+        <EditText
+            android:id="@+id/editTextMessage"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Type your message here" />
+
+        <Button
+            android:id="@+id/buttonSendMessage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/editTextMessage"
+            android:text="Send" />
+
+    </RelativeLayout>
+
+    <!-- TODO: You can add any other views or widgets here as needed -->
+
+    <!-- This TextView is just for demonstration -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Chat Fragment"
         android:textSize="30sp"
         android:layout_centerInParent="true"
-        android:textColor="@color/lavender"/>
+        android:textColor="@color/lavender" />
+
 </RelativeLayout>

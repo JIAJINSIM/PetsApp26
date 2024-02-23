@@ -4,7 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.android.material.navigation.NavigationView
-
+import android.util.Log
 import android.view.MenuItem
 import android.widget.Toast
 import androidx.appcompat.app.ActionBarDrawerToggle
@@ -52,20 +52,16 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .replace(R.id.fragment_container, Login()).commit()
             navigationView.setCheckedItem(R.id.nav_login)
         }
+
+        // Check if user is signed in (non-null) and update UI accordingly.
+
+        // No user is signed in, handle the case appropriately
+            // For example, navigate to the login screen
+
     }
 
 
-//    private fun fetchUserRole() {
-//        val userId =  // method to get current user's ID
-//            firestore.collection("users").document(userId).get()
-//                .addOnSuccessListener { documentSnapshot ->
-//                    val userRole = documentSnapshot.getString("role") ?: "user" // default to "user" if not found
-//                    updateNavigationView(userRole)
-//                }
-//                .addOnFailureListener { e ->
-//                    Log.e("MainActivity", "Error fetching user role", e)
-//                }
-//    }
+
 
     fun updateNavigationView(userRole: String?) {
         val navigationView = findViewById<NavigationView>(R.id.nav_view)
@@ -119,66 +115,20 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     }
 
-        /*super.onCreate(savedInstanceState)
-        setContent {
-            PetsApp26Theme {
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Greeting("Android")
-                    // Example: Adding a new document to Firestore
-                    //addNewUser("newUsername", "newPassword")
-                }
-            }
-        }
-    }*/
 
-    /*private fun addNewUser(username: String, password: String) {
-        // Reference to the "users" collection (you can change "users" to your collection name)
-        val usersCollection = firestore.collection("users")
-
-        // Creating a new document with a unique auto-generated ID
-        val newDocumentRef = usersCollection.document()
-
-        // Adding data to the document
-        val userData = hashMapOf(
-            "username" to username,
-            "password" to password
-        )
-
-        // Set the data to the Firestore document
-        newDocumentRef.set(userData)
-            .addOnSuccessListener {
-                // Document added successfully
-                // You can handle success scenarios here
-                println("Document added successfully!")
-            }
-            .addOnFailureListener { e ->
-                // Handle errors here
-                println("Error adding document: $e")
-            }
-    }
-}
-
-    @Composable
-    fun Greeting(name: String, modifier: Modifier = Modifier) {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier
-        )
-    }
-
-    @Preview(showBackground = true)
-    @Composable
-    fun GreetingPreview() {
-        PetsApp26Theme {
-            Greeting("Android")
-        }
-    }*/
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
+            R.id.nav_contacts -> {
+                val contactsFragment = Contacts.newInstance("param1", "param2")
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.fragment_container, contactsFragment)
+                    .commit()
+                contactsFragment.fetchStaffMembers() // Call fetchStaffMembers function here
+                //contactsFragment.initRecyclerViewAdapter(emptyList()) // Initialize RecyclerView adapter here
+
+            // Handle other menu items...
+            }
             R.id.nav_login -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, Login()).commit()
             R.id.nav_chat -> supportFragmentManager.beginTransaction()
