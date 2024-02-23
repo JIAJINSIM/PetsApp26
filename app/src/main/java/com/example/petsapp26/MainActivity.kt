@@ -141,6 +141,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .replace(R.id.fragment_container, ShareFragment()).commit()
             R.id.nav_about -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, AboutFragment()).commit()
+
+            // for staff
+            R.id.nav_manage_appt -> supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, ApptFragment()).commit()
+
             R.id.nav_logout -> {
                 // Sign out from Firebase Authentication
                 FirebaseAuth.getInstance().signOut()
