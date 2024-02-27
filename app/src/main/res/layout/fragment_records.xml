@@ -1,0 +1,39 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".RecordFragment">
+
+    <!-- Search Bar for filtering records -->
+    <EditText
+        android:id="@+id/search_records"
+        android:layout_width="375dp"
+        android:layout_height="60dp"
+        android:hint="Search Records"
+        android:inputType="text" />
+
+    <!-- Button to add a new appointment -->
+
+    <!-- List to display appointments -->
+    <Button
+        android:id="@+id/add_records_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="1dp"
+        android:text="Add New Record" />
+
+    <ListView
+        android:id="@+id/records_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="0.5dp"
+        android:listSelector="@android:color/holo_blue_light" />
+
+    <!-- Footer or additional UI elements can be added here -->
+
+</LinearLayout>

@@ -13,6 +13,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentManager
+import com.example.petsapp26.Record
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -145,6 +146,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             // for staff
             R.id.nav_manage_appt -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, ApptFragment()).commit()
+            R.id.nav_records -> supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, RecordFragment()).commit()
 
             R.id.nav_logout -> {
                 // Sign out from Firebase Authentication
