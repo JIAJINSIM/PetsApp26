@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.ListView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
@@ -22,6 +23,8 @@ private const val ARG_PARAM2 = "param2"
  */
 
     data class Appointment(
+
+        var apptID: String? = null,
         var custID: String? = null, // Assuming this will hold the custID document ID or some identifier
         var description: Long? = null,
         var title: String? = null,
@@ -35,22 +38,20 @@ private const val ARG_PARAM2 = "param2"
         private lateinit var adapter: AppointmentAdapter
         private var appointments = mutableListOf<Appointment>()
 
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
+        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
             val view = inflater.inflate(R.layout.fragment_manageappt, container, false)
-
             val listView: ListView = view.findViewById(R.id.appointments_list)
 
-            // Initialize the custom adapter
-            adapter = AppointmentAdapter(requireContext(), appointments)
+            // Initialize the custom adapter with a delete callback
+            adapter = AppointmentAdapter(requireContext(), appointments) { appointment ->
+                deleteAppointment(appointment)
+            }
             listView.adapter = adapter
 
             fetchAppointments()
-
             return view
         }
+
 
         private fun fetchAppointments() {
             val db = FirebaseFirestore.getInstance()
@@ -59,26 +60,44 @@ private const val ARG_PARAM2 = "param2"
                 .get()
                 .addOnSuccessListener { documents ->
                     for (document in documents) {
+                        val apptID = document.getString("apptID") // Get apptID from the document
                         val custIDRef = document.getDocumentReference("custID")
                         val description = document.getLong("description")
                         val title = document.getString("title")
                         val vetID = document.getDocumentReference("vetID")
 
-                        custIDRef?.get()?.addOnSuccessListener { custDoc ->
-                            val custID = custDoc.id
-                            val appointment = Appointment(custID, description, title, vetID)
+                        val custID =
+                            custIDRef?.id // This assumes custIDRef is not null; adjust logic as needed
+                        val appointment = Appointment(apptID, custID, description, title, vetID)
 
-                            appointments.add(appointment)
-
-                            // Notify the adapter of the data change on the UI thread
-                            adapter.notifyDataSetChanged()
-                        }
+                        appointments.add(appointment)
                     }
+                    adapter.notifyDataSetChanged() // Update adapter outside the loop for efficiency
                 }
+
                 .addOnFailureListener { exception ->
                     Log.w("ApptFragment", "Error getting documents: ", exception)
                 }
         }
+
+
+        private fun deleteAppointment(appointment: Appointment) {
+            appointment.apptID?.let { apptID ->
+                FirebaseFirestore.getInstance().collection("Appointments")
+                    .document(apptID.toString()) // Convert apptID to String as Firestore document IDs are strings
+                    .delete()
+                    .addOnSuccessListener {
+                        Toast.makeText(context, "Appointment deleted.", Toast.LENGTH_SHORT).show()
+                        appointments.remove(appointment)
+                        adapter.notifyDataSetChanged() // Refresh the list
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("ApptFragment", "Error deleting appointment", e)
+                        Toast.makeText(context, "Failed to delete appointment.", Toast.LENGTH_SHORT).show()
+                    }
+            } ?: Toast.makeText(context, "Error: Appointment ID is null.", Toast.LENGTH_SHORT).show()
+        }
+
     }
 
 
