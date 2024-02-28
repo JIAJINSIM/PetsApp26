@@ -5,10 +5,12 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.example.petsapp26.databinding.FragmentRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import java.util.UUID
 
 class RegisterUser : Fragment() {
 
@@ -29,13 +31,24 @@ class RegisterUser : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // Initialize the spinner and set its adapter
+        ArrayAdapter.createFromResource(
+            requireContext(),
+            R.array.role_options,
+            android.R.layout.simple_spinner_item
+        ).also { adapter ->
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            binding.roleSpinner.adapter = adapter
+        }
+
         binding.register.setOnClickListener {
             val username = binding.username.text.toString().trim()
             val password = binding.password.text.toString().trim()
             val confirmPassword = binding.cfmPassword.text.toString().trim()
+            val role = binding.roleSpinner.selectedItem.toString()
 
             if (validateForm(username, password, confirmPassword)) {
-                registerUser(username, password)
+                registerUser(username, password, role)
             }
         }
 
@@ -86,18 +99,21 @@ class RegisterUser : Fragment() {
         return true
     }
 
-    private fun registerUser(username: String, password: String) {
+    private fun registerUser(username: String, password: String, role: String) {
         // First, check if the username already exists
         val usersCollection = FirebaseFirestore.getInstance().collection("users")
         usersCollection.whereEqualTo("username", username)
             .get()
             .addOnSuccessListener { documents ->
                 if (documents.isEmpty) {
+
+                    val uid = UUID.randomUUID().toString()
                     // Username does not exist, proceed with registration
                     val userData = hashMapOf(
+                        "uid" to uid,
                         "username" to username,
                         "password" to password,
-                        "role" to "user"
+                        "role" to role
                     )
                     usersCollection.add(userData)
                         .addOnSuccessListener {

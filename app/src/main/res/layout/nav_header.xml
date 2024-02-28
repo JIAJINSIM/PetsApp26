@@ -6,7 +6,7 @@
     android:layout_height="176dp"
     android:gravity="bottom"
     android:padding="16dp"
-    android:background="@drawable/ic_launcher_background"
+    android:background="@color/lavender"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
     <ImageView

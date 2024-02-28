@@ -18,6 +18,9 @@
         <item name="windowActionBar">false</item>
     </style>
 
+
+
+
     <style name="Theme.MainActivity" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/lavender</item>

@@ -13,4 +13,12 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+
+    <string-array name="role_options">
+        <item>user</item>
+        <item>specialist</item>
+    </string-array>
+
+    <string name="profile_username">Username: %1$s\nUID: %2$s\nPassword: %3$s</string>
+
 </resources>

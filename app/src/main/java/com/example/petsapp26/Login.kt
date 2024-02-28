@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import com.google.firebase.auth.FirebaseAuth
 
 
 
@@ -48,6 +49,7 @@ class Login : Fragment() {
         val loginButton = binding.login
         val registerLink = binding.registerLink
 
+
         loginButton.setOnClickListener {
             val username = usernameEditText.text.toString()
             val password = passwordEditText.text.toString()
@@ -66,6 +68,7 @@ class Login : Fragment() {
     }
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+
     private fun login(username: String, password: String) {
         firestore.collection("users")
             .whereEqualTo("username", username)
@@ -73,19 +76,55 @@ class Login : Fragment() {
             .addOnSuccessListener { documents ->
                 for (document in documents) {
                     val storedPassword = document.getString("password")
+                    val uid = document.getString("uid")
+                    val username = document.getString("username")
+                    // Inside your login success block
+                    val documentId = document.id  // This is the Firestore document ID
+                    val role = document.getString("role")
+
+
                     if (storedPassword == password) {
+
+                        val editor = activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)?.edit()
+                        //editor?.putString("userID", userId)
+                        editor?.putString("username", username)
+                        editor?.putString("role", role)
+                        editor?.putString("documentId", documentId)
+                        editor?.apply()
+
+                        println(username)
+                        println(role)
+                        println(documentId)
+                        // storeUserRole(uid, username,document.getString("role") ?: "user")
+                        // updateNavigationView(document.getString("role") ?: "user")
+                        enableNavigationDrawer()
+
                         // Login successful
                         Toast.makeText(requireContext(), "Login Successful!", Toast.LENGTH_SHORT).show()
+
                         val role = document.getString("role") ?: "user" // Default to "user" if null
-                        storeUserRole(role) // Store the role
+                        // storeUserRole(uid, username, role) // Store the role
                         updateNavigationView(role)
                         enableNavigationDrawer()
+
                         // Fetch user document ID and log it
-                        val userId = document.id
-                        Log.d("LoginFragment", "User ID: $userId")
+                        // val userId = document.id
+                        // Log.d("LoginFragment", "User ID: $userId")
                         // Pass the user ID to the Contacts fragment
-                        val contactsFragment = Contacts.newInstance(userId, "")
-                        contactsFragment.receiveUserId(userId)
+//                        val contactsFragment = Contacts.newInstance(userId, "")
+//                        contactsFragment.receiveUserId(userId)
+
+                        // Pass the Firestore document ID to the Contacts fragment
+                        // val contactsFragment = Contacts.newInstance(documentId, "")
+                        // contactsFragment.receiveUserId(documentId)
+
+                        // Log.d("LoginFragment", "User Document ID: $documentId")
+
+
+                        println("Username: $username, UID: $documentId, Password: $password")
+
+
+
                         return@addOnSuccessListener
                     }
                 }
@@ -95,23 +134,16 @@ class Login : Fragment() {
                 Toast.makeText(requireContext(), "Login Error: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }
-//    fun onRegisterLinkClick(view: View) {
-//        // Check if we are attached to an activity, as we need the fragmentManager from it
-//        if (isAdded) {
-//            activity?.supportFragmentManager?.beginTransaction()
-//                ?.replace(R.id.fragment_container, RegisterUser())
-//                ?.addToBackStack(null) // Add this transaction to the back stack
-//                ?.commit()
+
+
+//    private fun storeUserRole(documentId: String?, username: String?, role: String) {
+//        activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)?.edit()?.apply {
+//            putString("userID", documentId)
+//            putString("username", username)
+//            putString("userRole", role)
+//            apply()
 //        }
 //    }
-
-
-    private fun storeUserRole(role: String) {
-        activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)?.edit()?.apply {
-            putString("userRole", role)
-            apply()
-        }
-    }
 
 
     private fun enableNavigationDrawer() {

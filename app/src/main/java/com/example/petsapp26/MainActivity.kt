@@ -132,6 +132,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_login -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, Login()).commit()
+            R.id.nav_profile -> supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, Profile()).commit()
             R.id.nav_chat -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, Chat()).commit()
             R.id.nav_home -> supportFragmentManager.beginTransaction()

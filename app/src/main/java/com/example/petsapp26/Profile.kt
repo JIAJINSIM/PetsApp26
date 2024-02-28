@@ -1,59 +1,130 @@
+// Profile.kt
 package com.example.petsapp26
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.ImageView
+import android.widget.TextView
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+import com.bumptech.glide.Glide
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 
-/**
- * A simple [Fragment] subclass.
- * Use the [Profile.newInstance] factory method to
- * create an instance of this fragment.
- */
 class Profile : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
+    private lateinit var profileImageView: ImageView
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private val PICK_IMAGE_REQUEST = 1
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_profile, container, false)
+        val view = inflater.inflate(R.layout.fragment_profile, container, false)
+
+        profileImageView = view.findViewById(R.id.profileImage)
+
+        view.findViewById<Button>(R.id.changeProfileImageButton).setOnClickListener {
+            openImageChooser()
+        }
+
+        return view
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment Profile.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            Profile().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        val sharedPreferences = activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+
+        val firestoreDocumentId = sharedPreferences?.getString("userID", null)
+
+        val username = sharedPreferences?.getString("username", "No Username")
+        val usernameTextView: TextView = view.findViewById(R.id.tvUsername)
+
+        val documentId = sharedPreferences?.getString("documentID", "No ID") // Use 'No ID' as default value
+        val documentIdTextView: TextView = view.findViewById(R.id.tvUID)
+
+        // Set the TextViews to the retrieved values
+        usernameTextView.text = "Username: $username"
+        documentIdTextView.text = "Document ID: $documentId"
+
+        // Use the document ID to fetch user profile details
+        documentId?.let {
+            if (firestoreDocumentId != null && firestoreDocumentId != "No ID") {
+                println(firestoreDocumentId)
+                loadUserProfile(firestoreDocumentId)
+                Toast.makeText(context, "Document ID found", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "No Document ID found. Please log in again.", Toast.LENGTH_SHORT).show()
+                // Consider navigating back to the login screen
+            }
+        } ?: run {
+            // The document ID is null
+            Toast.makeText(context, "No Document ID found. Please log in again.", Toast.LENGTH_SHORT).show()
+            // Consider navigating back to the login screen
+        }
+
+    }
+
+    private fun openImageChooser() {
+        val intent = Intent(Intent.ACTION_PICK)
+        intent.type = "image/*"
+        startActivityForResult(intent, PICK_IMAGE_REQUEST)
+    }
+
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if (requestCode == PICK_IMAGE_REQUEST && resultCode == Activity.RESULT_OK && data != null && data.data != null) {
+            val imageUri: Uri = data.data!!
+            profileImageView.setImageURI(imageUri)
+        }
+    }
+
+
+    private fun loadUserProfile(documentId: String) {
+        val userDocRef = FirebaseFirestore.getInstance().collection("users").document(documentId)
+
+        userDocRef.get()
+            .addOnSuccessListener { documentSnapshot ->
+                if (documentSnapshot.exists()) {
+                    // Extract user details
+                    val username = documentSnapshot.getString("username") ?: "Unknown"
+                    val role = documentSnapshot.getString("role") ?: "Unknown"
+                    val imageUrl = documentSnapshot.getString("profileImageUrl")
+
+                    // Update the TextViews with the user details
+                    val usernameTextView: TextView = view?.findViewById(R.id.tvUsername) ?: return@addOnSuccessListener
+                    val documentIdTextView: TextView = view?.findViewById(R.id.tvUID) ?: return@addOnSuccessListener
+
+                    usernameTextView.text = "Username: $username"
+                    documentIdTextView.text = "Document ID: $documentId"
+
+                    // Load the profile image if available
+                    imageUrl?.let { url ->
+                        Glide.with(this).load(url).into(profileImageView)
+                    }
+                } else {
+                    Toast.makeText(context, "Profile not found.", Toast.LENGTH_SHORT).show()
                 }
             }
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
+
+
+
 }
+
+
