@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
 
     <!-- item_message.xml -->
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    <TextView
         android:id="@+id/senderTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -16,9 +16,9 @@
         android:paddingEnd="8dp"
         android:paddingBottom="4dp"/>
 
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    <TextView
         android:id="@+id/messageTextView"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="14sp"
         android:paddingStart="8dp"
@@ -26,7 +26,7 @@
         android:paddingEnd="8dp"
         android:paddingBottom="4dp"/>
 
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    <TextView
         android:id="@+id/timestampTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

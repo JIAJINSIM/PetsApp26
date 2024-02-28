@@ -7,27 +7,37 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
+import android.widget.EditText
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.gms.tasks.Tasks
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.auth.FirebaseAuth
-val userId = FirebaseAuth.getInstance().currentUser?.uid
-
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.PropertyName
+import com.google.firebase.firestore.QuerySnapshot
 
 
 data class Message(
-    val sender: String,
-    val message: String,
-    val timestamp: Timestamp = Timestamp.now()
+    @PropertyName("sender") val sender: String = "",
+    @PropertyName("message") val message: String = "",
+    @PropertyName("timestamp") val timestamp: Timestamp = Timestamp.now(),
+    @PropertyName("receiver") val receiver: String? = null, // Add this if you are using a receiver field in Firestore
+    var senderUsername: String = "" // Temporary field to hold the username once fetched
 )
 
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
+private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
 class Chat : Fragment() {
     private var param1: String? = null
     private var param2: String? = null
+    private lateinit var adapter: ChatAdapter // Declare adapter at class level
+    private lateinit var recyclerView: RecyclerView
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,60 +52,127 @@ class Chat : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_chat, container, false)
+        val view = inflater.inflate(R.layout.fragment_chat, container, false)
+
+        // Update UI elements in the layout
+        /*userId?.let {
+            view.findViewById<TextView>(R.id.textViewUserId)?.text = it
+        }*/
+
+        return view
     }
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView)
+        recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView) // Initialization moved here
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
-        // Get current user ID
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+        adapter = ChatAdapter()
+        recyclerView.adapter = adapter
 
-        // Fetch messages from Firestore for the current user
-        currentUserId?.let { userId ->
-            fetchMessagesFromFirestore(userId) { messages ->
-                // Set up adapter with messages retrieved from Firestore
-                recyclerView.adapter = ChatAdapter(messages)
-            }
+        fetchMessages()
+        view.findViewById<Button>(R.id.buttonSendMessage).setOnClickListener {
+        sendMessage()
+        view.findViewById<EditText>(R.id.editTextMessage).text.clear() // Clear the input field after sending
+    }
+
+    }
+    private fun sendMessage() {
+        val editTextMessage = view?.findViewById<EditText>(R.id.editTextMessage)
+        val messageText = editTextMessage?.text.toString()
+        if (messageText.isNotEmpty()) {
+            val receiverId = arguments?.getString(ARG_PARAM1)
+            val currentUserId = PreferencesUtil.getCurrentUserId(requireContext())
+
+            val message = hashMapOf(
+                "sender" to currentUserId,
+                "receiver" to receiverId,
+                "message" to messageText,
+                "timestamp" to FieldValue.serverTimestamp()
+            )
+
+            firestore.collection("chats").add(message)
+                .addOnSuccessListener {
+                    Log.d(TAG, "Message sent successfully")
+                    editTextMessage?.text?.clear() // Correctly clear the text field
+                    fetchMessages() // Adjusted: No need to pass adapter as it's a class variable
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Failed to send message", e)
+                }
         }
     }
 
-    private fun fetchMessagesFromFirestore(userId: String, callback: (MutableList<Message>) -> Unit) {
-        firestore.collection("your_messages_collection")
-            .whereEqualTo("receiverId", userId) // Assuming each message has a receiver ID
-            .get()
-            .addOnSuccessListener { documents ->
-                val messages = mutableListOf<Message>()
-                for (document in documents) {
-                    val documentId = document.id // Get the document ID
-                    val sender = document.getString("sender") ?: ""
-                    val message = document.getString("message") ?: ""
-                    val timestamp = document.getTimestamp("timestamp") ?: Timestamp.now()
-                    messages.add(Message(sender, message, timestamp))
-                    Log.d(TAG, "Message retrieved. Document ID: $documentId")
+
+    private fun fetchMessages() {
+        val selectedUserId = arguments?.getString(ARG_PARAM1)
+        val currentUserId = PreferencesUtil.getCurrentUserId(requireContext())
+        val userIds = HashSet<String>()
+
+        val messages = ArrayList<Message>()
+
+        // Prepare combined query (still need to execute them separately)
+        val queries = listOf(
+            firestore.collection("chats")
+                .whereEqualTo("sender", currentUserId).whereEqualTo("receiver", selectedUserId),
+            firestore.collection("chats")
+                .whereEqualTo("sender", selectedUserId).whereEqualTo("receiver", currentUserId)
+        )
+
+        // Fetch messages
+        val tasks = queries.map { it.get() }
+        Tasks.whenAllSuccess<QuerySnapshot>(tasks).addOnSuccessListener { querySnapshots ->
+            querySnapshots.forEach { querySnapshot ->
+                querySnapshot.forEach { document ->
+                    val message = document.toObject(Message::class.java)
+                    messages.add(message)
+
+                    // Collect userIds for username fetching
+                    userIds.add(message.sender)
                 }
-                if (messages.isNotEmpty()) {
-                    Log.d(TAG, "Messages retrieved: ${messages.size}")
-                } else {
-                    Log.d(TAG, "No messages found for user")
-                }
-                callback(messages)
             }
-            .addOnFailureListener { exception ->
-                Log.w(TAG, "Error getting messages for user from Firestore", exception)
-                // Handle failure gracefully, e.g., show error message to user
+
+            // Proceed to fetch usernames
+            fetchUsernames(userIds, messages)
+        }
+    }
+    private fun fetchUsernames(userIds: Set<String>, messages: ArrayList<Message>) {
+        val usernameMap = HashMap<String, String>()
+
+        // Create a task list for all fetch operations
+        val tasks = userIds.map { userId ->
+            firestore.collection("users").document(userId).get().addOnSuccessListener { document ->
+                val username = document.getString("username") ?: "Unknown"
+                usernameMap[userId] = username
             }
+        }
+
+        Tasks.whenAllSuccess<DocumentSnapshot>(tasks).addOnSuccessListener {
+            // Map usernames to messages
+            messages.forEach { message ->
+                message.senderUsername = usernameMap[message.sender] ?: "Unknown"
+            }
+
+            // Sort messages by timestamp
+            messages.sortBy { it.timestamp }
+
+            // Update adapter's data source and UI
+            adapter.updateData(messages)
+            adapter.notifyDataSetChanged()
+            recyclerView.scrollToPosition(adapter.itemCount - 1)
+        }
     }
     companion object {
         @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            Chat().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+        // Adjust parameter names as necessary
+        fun newInstance(selectedUserId: String): Chat {
+            val fragment = Chat()
+            val args = Bundle().apply {
+                putString(ARG_PARAM1, selectedUserId)
+                Log.d(TAG, "Select user ID receiver from companion object:, $selectedUserId")
             }
+            fragment.arguments = args
+            return fragment
+        }
     }
+
 }

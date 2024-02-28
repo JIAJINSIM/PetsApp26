@@ -18,7 +18,7 @@
     <RelativeLayout
         android:id="@+id/inputLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="100dp"
         android:layout_alignParentBottom="true"
         android:padding="8dp">
 
@@ -39,15 +39,5 @@
 
     </RelativeLayout>
 
-    <!-- TODO: You can add any other views or widgets here as needed -->
-
-    <!-- This TextView is just for demonstration -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Chat Fragment"
-        android:textSize="30sp"
-        android:layout_centerInParent="true"
-        android:textColor="@color/lavender" />
 
 </RelativeLayout>

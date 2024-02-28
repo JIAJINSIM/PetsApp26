@@ -19,16 +19,24 @@ data class User(
     val role: String = ""
 )
 
+data class UserData(val userId: String)
+
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 private const val TAG = "ContactsFragment"
+
+
 // Inside your Contacts fragment
 //val currentUser = FirebaseAuth.getInstance().currentUser
 //val userId = currentUser?.uid
 class Contacts : Fragment() {
 
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private lateinit var userId: String
 
+    fun setUserId(userId: String) {
+        this.userId = userId
+    }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -38,6 +46,7 @@ class Contacts : Fragment() {
     // Function to receive the user ID
     fun receiveUserId(userId: String) {
         // Use the user ID here in the Contacts fragment
+        this.userId = userId
         Log.d(TAG, "Received User ID: $userId")
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -74,38 +83,57 @@ class Contacts : Fragment() {
         }
     }
     private fun checkExistingConversation(contactUsername: String) {
-        /// Get the current user's ID
-        FirebaseAuth.getInstance().currentUser
-        val currentUserID = FirebaseAuth.getInstance().currentUser?.uid
-        // Log the current user's ID for debugging
-        Log.d(TAG, "Current User ID: $currentUserID")
-        // Query Firestore to check if a conversation exists between the current user and the selected contact
-        firestore.collection("conversations")
-            .whereEqualTo("participants.$currentUserID", true)
-            .whereEqualTo("participants.$contactUsername", true)
+        // Query Firestore to find the user document with the selected contact's username
+        firestore.collection("users")
+            .whereEqualTo("username", contactUsername)
             .get()
             .addOnSuccessListener { documents ->
                 if (!documents.isEmpty) {
-                    // If conversation exists, navigate to Chat fragment to show chat history
-                    val chatFragment = Chat.newInstance(contactUsername, "admin")
-                    requireActivity().supportFragmentManager.beginTransaction()
-                        .replace(R.id.fragment_container, chatFragment)
-                        .addToBackStack(null)
-                        .commit()
+                    // Retrieve the document ID of the user with the selected contact's username
+                    val documentId = documents.documents.firstOrNull()?.id
+                    documentId?.let { userId ->
+                        // If a document ID is found, navigate to the chat fragment with the user's ID
+                        navigateToChatFragment(userId)
+                        Log.e(TAG, "Trying to find the receiver userid $userId")
+                    } ?: run {
+                        // If no document ID is found, log an error or handle it accordingly
+                        Log.e(TAG, "No document ID found for username: $contactUsername")
+                    }
                 } else {
-                    // If conversation does not exist, create a new conversation
-                    createNewConversation(contactUsername)
+                    // If no user document is found with the selected contact's username, handle it accordingly
+                    Log.d(TAG, "No user found with username: $contactUsername")
                 }
             }
             .addOnFailureListener { exception ->
-                Log.e(TAG, "Error checking conversation existence: $exception")
+                Log.e(TAG, "Error fetching user document: $exception")
                 // Handle failure gracefully, e.g., show error message to user
             }
     }
-    private fun createNewConversation(contactUsername: String) {
-        // Here you would create a new conversation document in your Firestore database
-        // For simplicity, let's just print a log message
-        Log.d(TAG, "Creating new conversation with $contactUsername")
+    /*private fun createNewConversation(contactUsername: String) {
+        val currentUserId = PreferencesUtil.getCurrentUserId(requireContext()) ?: return
+
+        val newChatDocument = hashMapOf(
+            "sender" to currentUserId,
+            "receiver" to contactUsername, // Assuming you store usernames; consider using user IDs instead
+            "message" to "Start of conversation", // Placeholder initial message
+            "timestamp" to FieldValue.serverTimestamp()
+        )
+
+        firestore.collection("chats").add(newChatDocument)
+            .addOnSuccessListener { documentReference ->
+                navigateToChatFragment(documentReference.id, contactUsername)
+            }
+            .addOnFailureListener { e ->
+                Log.e(TAG, "Error creating new conversation", e)
+            }
+    }*/
+
+    private fun navigateToChatFragment(userId: String) {
+        val chatFragment = Chat.newInstance(userId)
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragment_container, chatFragment)
+            .addToBackStack(null)
+            .commit()
     }
     private fun conversationExists(contactUsername: String): Boolean {
         // Implement logic to check if conversation exists
