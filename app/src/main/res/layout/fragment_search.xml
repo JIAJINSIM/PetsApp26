@@ -1,28 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".ApptFragment">
+    tools:context=".SearchFragment">
 
-    <!-- Search Bar for filtering appointments -->
     <EditText
         android:id="@+id/search_clinic"
-        android:layout_width="375dp"
+        android:layout_width="match_parent"
         android:layout_height="60dp"
         android:hint="Search Clinics"
         android:inputType="text" />
 
-    <!-- Button to add a new appointment -->
-
-    <!-- List to display appointments -->
     <Button
         android:id="@+id/search_clinic_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="1dp"
+        android:layout_marginTop="16dp"
         android:text="Search" />
 
     <ListView
@@ -33,7 +30,5 @@
         android:divider="@android:color/darker_gray"
         android:dividerHeight="0.5dp"
         android:listSelector="@android:color/holo_blue_light" />
-
-    <!-- Footer or additional UI elements can be added here -->
 
 </LinearLayout>
