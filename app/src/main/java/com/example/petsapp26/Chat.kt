@@ -106,36 +106,30 @@ class Chat : Fragment() {
     private fun fetchMessages() {
         val selectedUserId = arguments?.getString(ARG_PARAM1)
         val currentUserId = PreferencesUtil.getCurrentUserId(requireContext())
-        val userIds = HashSet<String>()
 
-        val messages = ArrayList<Message>()
+        Log.d(TAG, "currentuserID from fetchMessage:, $currentUserId")
+        // Start with messages where the current user is the sender.
+        firestore.collection("chats")
+            .whereEqualTo("sender", currentUserId)
+            .whereEqualTo("receiver", selectedUserId)
+            .get()
+            .addOnSuccessListener { documents1 ->
+                val messages = documents1.mapNotNull { it.toObject(Message::class.java) }.toMutableList()
 
-        // Prepare combined query (still need to execute them separately)
-        val queries = listOf(
-            firestore.collection("chats")
-                .whereEqualTo("sender", currentUserId).whereEqualTo("receiver", selectedUserId),
-            firestore.collection("chats")
-                .whereEqualTo("sender", selectedUserId).whereEqualTo("receiver", currentUserId)
-        )
+                // Next, fetch messages where the current user is the receiver.
+                firestore.collection("chats")
+                    .whereEqualTo("sender", selectedUserId)
+                    .whereEqualTo("receiver", currentUserId)
+                    .get()
+                    .addOnSuccessListener { documents2 ->
+                        messages.addAll(documents2.mapNotNull { it.toObject(Message::class.java) })
 
-        // Fetch messages
-        val tasks = queries.map { it.get() }
-        Tasks.whenAllSuccess<QuerySnapshot>(tasks).addOnSuccessListener { querySnapshots ->
-            querySnapshots.forEach { querySnapshot ->
-                querySnapshot.forEach { document ->
-                    val message = document.toObject(Message::class.java)
-                    messages.add(message)
-
-                    // Collect userIds for username fetching
-                    userIds.add(message.sender)
-                }
+                        // Continue with username fetching and updating UI...
+                        fetchUsernames(messages.map { it.sender }.toSet(), messages)
+                    }
             }
-
-            // Proceed to fetch usernames
-            fetchUsernames(userIds, messages)
-        }
     }
-    private fun fetchUsernames(userIds: Set<String>, messages: ArrayList<Message>) {
+    private fun fetchUsernames(userIds: Set<String>, messages: MutableList<Message>) {
         val usernameMap = HashMap<String, String>()
 
         // Create a task list for all fetch operations

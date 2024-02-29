@@ -107,6 +107,9 @@ class Login : Fragment() {
                         updateNavigationView(role)
                         enableNavigationDrawer()
 
+
+                        val userId = document.id
+                        PreferencesUtil.storeUserIdInPreferences(userId, requireContext()) // Store user ID in preferences
                         // Fetch user document ID and log it
                         // val userId = document.id
                         // Log.d("LoginFragment", "User ID: $userId")

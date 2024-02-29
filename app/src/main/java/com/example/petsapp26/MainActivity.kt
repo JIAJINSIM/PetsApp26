@@ -13,6 +13,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.view.GravityCompat
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.petsapp26.Record
 import com.google.firebase.auth.FirebaseAuth
 
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
     private lateinit var drawerLayout: DrawerLayout
     private lateinit var toggle: ActionBarDrawerToggle
     private lateinit var toolbar: Toolbar // Define toolbar variable
+    //private lateinit var recyclerView: RecyclerView
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,6 +36,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         val userRole = getUserRole() // Retrieve the user's role
         updateNavigationView(userRole) // Update the navigation view based on the role
+
 
         toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -86,7 +89,9 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         val preferences = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         return preferences.getString("userRole", "user") ?: "user" // Default to "user"
     }
+    fun disableStaffListAdapter(){
 
+    }
 
 
 
@@ -119,11 +124,14 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
+        val contactsFragment = Contacts.newInstance("param1", "param2")
+// Add this log before committing the transaction to add the ContactsFragment
+        Log.d("MainActivity", "ContactsFragment added with tag: ContactsFragment, $contactsFragment" )
         when (item.itemId) {
             R.id.nav_contacts -> {
-                val contactsFragment = Contacts.newInstance("param1", "param2")
+
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, contactsFragment)
+                    .replace(R.id.fragment_container, Contacts.newInstance("param1", "param2"), "ContactsFragmentTag")
                     .commit()
                 contactsFragment.fetchStaffMembers() // Call fetchStaffMembers function here
                 //contactsFragment.initRecyclerViewAdapter(emptyList()) // Initialize RecyclerView adapter here
@@ -154,18 +162,27 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .replace(R.id.fragment_container, RecordFragment()).commit()
 
             R.id.nav_logout -> {
+
                 // Sign out from Firebase Authentication
                 FirebaseAuth.getInstance().signOut()
+                //val contactsFragment = supportFragmentManager.findFragmentByTag("ContactsFragmentTag") as? Contacts
+                //contactsFragment?.clearAdapter()
+                // Log to verify if clearStaffListAdapterData() is called
+                //Log.d("MainActivity", "clearStaffListAdapterData() called: ${contactsFragment != null}")
 
                 // Clear any saved user data (e.g., SharedPreferences)
                 val sharedPreferences = getSharedPreferences("YourSharedPrefs", Context.MODE_PRIVATE)
                 sharedPreferences.edit().clear().apply()
-
+                PreferencesUtil.clearUserId(this) // Assuming 'this' is a Context
                 // Display logout message
                 Toast.makeText(this, "Logged out!", Toast.LENGTH_SHORT).show()
 
                 // Disable navigation drawer
                 disableNavigationDrawer()
+                // Clear staff list adapter data
+
+
+
 
                 // Replace the fragment with the login fragment
                 supportFragmentManager.beginTransaction()
@@ -174,11 +191,13 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
                 // Clear back stack to prevent going back to the secured fragments
                 supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+
             }
         }
         drawerLayout.closeDrawer(GravityCompat.START)
         return true
     }
+
     override fun onBackPressed() {
         if (drawerLayout.isDrawerOpen(GravityCompat.START)) {
             drawerLayout.closeDrawer(GravityCompat.START)

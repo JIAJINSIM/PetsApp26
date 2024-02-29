@@ -7,11 +7,19 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class StaffListAdapter(private val staffList: List<User>,private val onItemClick: (User) -> Unit) :
+class StaffListAdapter(private val staffList: MutableList<User>,private val onItemClick: (User) -> Unit) :
     RecyclerView.Adapter<StaffListAdapter.ViewHolder>() {
     init {
         Log.d(TAG, "StaffListAdapter initialized")
     }
+
+    // Call this method to clear the adapter's data
+    fun clear() {
+        staffList.clear()
+        notifyDataSetChanged()
+        Log.d(TAG, "Staff list cleared")
+    }
+
 
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val usernameTextView: TextView = itemView.findViewById(R.id.textViewUsername)
@@ -44,11 +52,8 @@ class StaffListAdapter(private val staffList: List<User>,private val onItemClick
         Log.d(TAG, "Username: ${staff.username}, Role: ${staff.role}")
     }
 
-    override fun getItemCount(): Int {
-        Log.d(TAG, "Activated stafflistadapter")
-        return staffList.size
-    }
-
+    override fun getItemCount(): Int = staffList.size
+    // Additional function to update data
     companion object {
         private const val TAG = "StaffListAdapter"
     }

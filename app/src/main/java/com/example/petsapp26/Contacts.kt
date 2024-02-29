@@ -23,7 +23,7 @@ data class UserData(val userId: String)
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 private const val TAG = "ContactsFragment"
-
+private lateinit var staffListAdapter: StaffListAdapter
 
 // Inside your Contacts fragment
 //val currentUser = FirebaseAuth.getInstance().currentUser
@@ -55,31 +55,47 @@ class Contacts : Fragment() {
     }
 
     fun fetchStaffMembers() {
-        firestore.collection("users")
-            .whereEqualTo("role", "admin")
-            .get()
-            .addOnSuccessListener { documents ->
-                if (documents.isEmpty) {
-                    Log.d(TAG, "No documents found for users with admin role.")
-                } else {
-                    val staffList = documents.toObjects(User::class.java)
-                    initRecyclerViewAdapter(staffList)
-                    Log.d(TAG, "Found existing DB for users with admin role.")
+        val currentUserId = context?.let { PreferencesUtil.getCurrentUserId(it) }
+
+        if (currentUserId != null) {
+            firestore.collection("users")
+                .whereEqualTo("role", "admin")
+                .get()
+                .addOnSuccessListener { documents ->
+                    if (documents.isEmpty) {
+                        Log.d(TAG, "No documents found for users with admin role.")
+                    } else {
+                        val staffList = documents.toObjects(User::class.java)
+                        initRecyclerViewAdapter(staffList)
+                        Log.d(TAG, "Found existing DB for users with admin role.")
+                    }
                 }
+                .addOnFailureListener { exception ->
+                    Log.w(TAG, "Error getting documents: ", exception)
+                }
+        }
+        else{
+            // If currentUserId is null, clear the adapter if it's initialized
+            if (::staffListAdapter.isInitialized) {
+                staffListAdapter.clear()
             }
-            .addOnFailureListener { exception ->
-                Log.w(TAG, "Error getting documents: ", exception)
-            }
+        }
     }
 
-    private fun initRecyclerViewAdapter(staffList: List<User>) {
+    private fun initRecyclerViewAdapter(staffList: MutableList<User>) {
         val recyclerView = view?.findViewById<RecyclerView>(R.id.recyclerViewStaff)
         recyclerView?.layoutManager = LinearLayoutManager(requireContext())
-        recyclerView?.adapter = StaffListAdapter(staffList) { user ->
+        // Create an instance of StaffListAdapter
+        staffListAdapter = StaffListAdapter(staffList) { user ->
             // Handle click event here, navigate to chat fragment
             checkExistingConversation(user.username)
-
         }
+
+        recyclerView?.adapter = staffListAdapter
+    }
+
+    fun clearAdapter() {
+        staffListAdapter?.clear()
     }
     private fun checkExistingConversation(contactUsername: String) {
         // Query Firestore to find the user document with the selected contact's username
