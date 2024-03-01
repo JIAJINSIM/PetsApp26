@@ -9,6 +9,7 @@ import android.widget.ArrayAdapter
 import android.widget.ListView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
 
@@ -24,16 +25,19 @@ private const val ARG_PARAM2 = "param2"
 
     data class Appointment(
 
-        var apptID: String? = null,
-        var custID: String? = null, // Assuming this will hold the custID document ID or some identifier
-        var description: Long? = null,
-        var title: String? = null,
-        var vetID: DocumentReference? = null
+    var apptID: String? = null,
+    var custID: String? = null, // Assuming this will hold the custID document ID or some identifier
+    var date: Timestamp? = null,
+    var description: String? = null,
+    var title: String? = null,
+    var vetID: DocumentReference? = null
     )
 
 
 
-    class ApptFragment : Fragment() {
+    class ApptFragment : Fragment(),AppointmentActionListener {
+
+
 
         private lateinit var adapter: AppointmentAdapter
         private var appointments = mutableListOf<Appointment>()
@@ -43,9 +47,8 @@ private const val ARG_PARAM2 = "param2"
             val listView: ListView = view.findViewById(R.id.appointments_list)
 
             // Initialize the custom adapter with a delete callback
-            adapter = AppointmentAdapter(requireContext(), appointments) { appointment ->
-                deleteAppointment(appointment)
-            }
+            adapter = AppointmentAdapter(requireContext(), appointments, this)
+
             listView.adapter = adapter
 
             fetchAppointments()
@@ -62,13 +65,14 @@ private const val ARG_PARAM2 = "param2"
                     for (document in documents) {
                         val apptID = document.getString("apptID") // Get apptID from the document
                         val custIDRef = document.getDocumentReference("custID")
-                        val description = document.getLong("description")
+                        val date = document.getTimestamp("date")
+                        val description = document.getString("description")
                         val title = document.getString("title")
                         val vetID = document.getDocumentReference("vetID")
 
                         val custID =
                             custIDRef?.id // This assumes custIDRef is not null; adjust logic as needed
-                        val appointment = Appointment(apptID, custID, description, title, vetID)
+                        val appointment = Appointment(apptID, custID, date, description, title, vetID)
 
                         appointments.add(appointment)
                     }
@@ -81,7 +85,7 @@ private const val ARG_PARAM2 = "param2"
         }
 
 
-        private fun deleteAppointment(appointment: Appointment) {
+        override fun deleteAppointment(appointment: Appointment) {
             appointment.apptID?.let { apptID ->
                 FirebaseFirestore.getInstance().collection("Appointments")
                     .document(apptID.toString()) // Convert apptID to String as Firestore document IDs are strings
@@ -97,6 +101,24 @@ private const val ARG_PARAM2 = "param2"
                     }
             } ?: Toast.makeText(context, "Error: Appointment ID is null.", Toast.LENGTH_SHORT).show()
         }
+        override fun onEditAppointment(appointment: Appointment) {
+            val bundle = Bundle().apply {
+                putString("apptID", appointment.apptID)
+                // Add other appointment details as needed
+            }
+            navigateToEditAppointmentFragment(bundle)
+        }
+
+        private fun navigateToEditAppointmentFragment(bundle: Bundle) {
+            val fragment = EditAppointmentFragment().apply {
+                arguments = bundle
+            }
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, fragment)
+                .addToBackStack(null)
+                .commit()
+        }
+
 
     }
 

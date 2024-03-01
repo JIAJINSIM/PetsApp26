@@ -21,4 +21,9 @@
 
     <string name="profile_username">Username: %1$s\nUID: %2$s\nPassword: %3$s</string>
 
+    <string name="select_date">Select Date</string>
+    <string name="select_time">Select Time</string>
+    <string name="select_vet">Select Vet</string>
+    <string name="description">Description</string>
+    <string name="save_appointment">Save Appointment</string>
 </resources>

@@ -16,7 +16,7 @@
 
     <!-- Button to add a new appointment -->
 
-    <!-- List to display appointments -->
+    <!-- List to display appointments
     <Button
         android:id="@+id/add_appointment_button"
         android:layout_width="wrap_content"
@@ -24,7 +24,7 @@
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="1dp"
         android:text="Add New Appointment" />
-
+-->
     <ListView
         android:id="@+id/appointments_list"
         android:layout_width="match_parent"
