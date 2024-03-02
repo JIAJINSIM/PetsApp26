@@ -80,6 +80,9 @@ class RecordFragment : Fragment() {
     private fun fetchRecords() {
         val db = FirebaseFirestore.getInstance()
 
+        // clear existing records before fetching new ones
+        records.clear()
+
         db.collection("Records")
             .get()
             .addOnSuccessListener { documents ->
