@@ -28,4 +28,11 @@
     <string name="select_vet">Select Vet</string>
     <string name="description">Description</string>
     <string name="save_appointment">Save Appointment</string>
+
+    <string name="select_area">Select an area</string>
+    <string name="select_rating">Select a rating</string>
+    <string name="show_filters">Other Filters</string>
+    <string name="hide_filters">Hide Filters</string>
+
+
 </resources>
