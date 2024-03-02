@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:id="@+id/fragment_container"
+    android:layout_height="wrap_content"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvPetNameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pet Name:"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:layout_alignParentStart="true"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tvPetName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/tvPetNameLabel"
+        android:layout_alignBottom="@id/tvPetNameLabel"
+        android:layout_marginStart="25dp"
+        android:text="Pet Name"
+        android:textAppearance="?attr/textAppearanceListItem" />
+
+    <TextView
+        android:id="@+id/tvPetBreedLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pet Breed:"
+        android:layout_below="@id/tvPetName"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:layout_alignParentStart="true"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tvPetBreed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/tvPetBreedLabel"
+        android:layout_marginStart="25dp"
+        android:text="Breed"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:layout_alignBottom="@id/tvPetBreedLabel"/>
+
+    <TextView
+        android:id="@+id/tvPetAgeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pet Age:"
+        android:layout_below="@id/tvPetBreed"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:layout_alignParentStart="true"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tvPetAge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvPetBreed"
+        android:layout_toEndOf="@id/tvPetBreedLabel"
+        android:layout_marginStart="25dp"
+        android:text="Age"
+        android:textAppearance="?attr/textAppearanceListItem" />
+
+    <TextView
+        android:id="@+id/tvPetGenderLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pet Gender:"
+        android:layout_below="@id/tvPetAge"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:layout_alignParentStart="true"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tvPetGender"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvPetAge"
+        android:layout_toEndOf="@id/tvPetGenderLabel"
+        android:layout_marginStart="15dp"
+        android:text="Gender"
+        android:textAppearance="?attr/textAppearanceListItem" />
+
+    <TextView
+        android:id="@+id/tvPetMedicalLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Pet Medical:"
+        android:layout_below="@id/tvPetGender"
+        android:textAppearance="?attr/textAppearanceListItem"
+        android:layout_alignParentStart="true"
+        android:textStyle="bold"/>
+
+    <TextView
+        android:id="@+id/tvPetMedical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvPetGender"
+        android:layout_toEndOf="@id/tvPetMedicalLabel"
+        android:layout_marginStart="10dp"
+        android:text="Medical"
+        android:textAppearance="?attr/textAppearanceListItem" />
+
+    <Button
+        android:id="@+id/btnEditPet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvPetMedical"
+        android:layout_alignParentStart="true"
+        android:text="Edit"
+        android:layout_marginTop="8dp"/>
+
+    <Button
+        android:id="@+id/btnDeletePet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvPetMedical"
+        android:layout_toEndOf="@id/btnEditPet"
+        android:text="Delete"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"/>
+
+
+</RelativeLayout>

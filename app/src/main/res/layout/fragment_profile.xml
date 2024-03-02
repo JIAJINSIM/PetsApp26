@@ -5,7 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".Profile">
+    tools:context=".Profile"
+    >
+
 
     <ImageView
         android:id="@+id/profileImage"
@@ -13,43 +15,85 @@
         android:layout_height="150dp"
         android:src="@drawable/profile"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="25dp"/>
-
-    <Button
-        android:id="@+id/changeProfileImageButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Change Profile Image"
-        android:layout_below="@id/profileImage"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="25dp"
+        android:scaleType="centerCrop"
+        />
 
     <TextView
         android:id="@+id/tvUsername"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/changeProfileImageButton"
+        android:layout_below="@id/profileImage"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:textSize="16sp"
+        android:layout_marginTop="4dp"
+        android:textSize="20sp"
         android:textColor="@color/black"
         android:textStyle="bold"
-        android:text="Username:"/>
+        android:text=""/>
+
+    <Button
+        android:id="@+id/changeProfileImageButton"
+        android:layout_width="170dp"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/tvUsername"
+        android:layout_marginTop="15dp"
+        android:text="Change Profile Image"
+        android:layout_marginLeft="20dp"/>
 
 
-    <TextView
-        android:id="@+id/tvUID"
-        android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/changeProfileDetails"
+        android:layout_width="170dp"
         android:layout_height="wrap_content"
         android:layout_below="@id/tvUsername"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="8dp"
-        android:textSize="16sp"
-        android:textColor="@color/black"
-        android:text="UID:"
-        android:textStyle="bold"/>
+        android:layout_marginLeft="30dp"
+        android:layout_marginTop="15dp"
+        android:layout_toRightOf="@id/changeProfileImageButton"
+        android:text="View Pet Details" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_below="@id/changeProfileImageButton"
+        android:layout_marginTop="10dp"
+        android:background="@color/lavender"
+        />
 
 
 
+    <!-- RecyclerView for displaying pet images -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPetImages"
+        android:layout_width="match_parent"
+        android:layout_height="361dp"
+        android:layout_above="@+id/addPetImageButton"
+        android:layout_below="@+id/changeProfileImageButton"
+        android:layout_marginTop="29dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
+        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:spanCount="3"
+        tools:listitem="@layout/item_pet_image" />
+
+    <Button
+        android:id="@+id/addPetImageButton"
+        style="@style/Widget.AppCompat.Button.Colored"
+        android:layout_width="350dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp"
+        android:text="Add Pet Image"
+        android:layout_marginLeft="33dp"/>
+
+
+    <!--    <View-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="50dp"-->
+    <!--        android:layout_below="@id/changeProfileImageButton"-->
+    <!--        android:layout_marginTop="500dp"-->
+    <!--        android:background="@color/lavender"-->
+    <!--        />-->
 
 </RelativeLayout>
+

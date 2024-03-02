@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/registerTitle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="ADD PET DETAILS"
+        android:gravity="center_horizontal"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:layout_marginTop="20dp"/>
+
+
+    <EditText
+        android:id="@+id/etPetName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Pet Name"
+        android:layout_marginTop="30dp"
+        android:layout_marginBottom="5dp"
+        android:inputType="textPersonName"/>
+
+    <EditText
+        android:id="@+id/etPetBreed"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:hint="Pet Breed"
+        android:inputType="text"/>
+
+    <EditText
+        android:id="@+id/etPetAge"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:hint="Pet Age"
+        android:inputType="number"/>
+
+    <EditText
+        android:id="@+id/etPetGender"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="5dp"
+        android:hint="Pet Gender"
+        android:inputType="text"/>
+
+    <EditText
+        android:id="@+id/etPetMedicalHistory"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Pet Medical History"
+        android:layout_marginBottom="5dp"
+        android:inputType="textMultiLine"/>
+
+    <Button
+        android:id="@+id/btnSavePetDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Pet Details"/>
+
+
+</LinearLayout>
+
+
