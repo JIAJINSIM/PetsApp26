@@ -97,9 +97,16 @@ class SearchFragment : Fragment() {
         var query: Query = firestore.collection("veterinaries")
 
         // Add conditions for name, area, and rating
+        //if (queryText.isNotEmpty()) {
+            //query = query.whereEqualTo("name", queryText)
+        //}
+
         if (queryText.isNotEmpty()) {
-            query = query.whereEqualTo("name", queryText)
+            val endText = queryText + "\uf8ff" // High code point character to ensure all subsequent characters are included
+            query = query.whereGreaterThanOrEqualTo("name", queryText)
+                .whereLessThanOrEqualTo("name", endText)
         }
+
         if (selectedArea != "All Areas") {
             query = query.whereEqualTo("location.area", selectedArea)
         }
