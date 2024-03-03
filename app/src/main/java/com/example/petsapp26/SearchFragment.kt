@@ -39,6 +39,9 @@ class SearchFragment : Fragment() {
         setupAreaSpinner(view)
         setupRatingSpinner(view)
 
+        // Fetch and display all clinics
+        fetchAllClinics()
+
         showFiltersButton.setOnClickListener {
             // Toggle the visibility of the filters container
             if (filtersContainer.visibility == View.GONE) {
@@ -128,6 +131,24 @@ class SearchFragment : Fragment() {
             }
             .addOnFailureListener { exception ->
                 // Handle error
+            }
+    }
+
+    private fun fetchAllClinics() {
+        firestore.collection("veterinaries")
+            .get()
+            .addOnSuccessListener { result ->
+                vetClinicList.clear()
+                for (document in result) {
+                    val vetClinic = document.toObject(VetClinic::class.java).apply {
+                        id = document.id
+                    }
+                    vetClinicList.add(vetClinic)
+                }
+                vetClinicAdaptor.notifyDataSetChanged()
+            }
+            .addOnFailureListener { exception ->
+                // Handle error, possibly by showing a message to the user
             }
     }
 }
