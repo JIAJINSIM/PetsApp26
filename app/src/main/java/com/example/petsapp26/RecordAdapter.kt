@@ -18,12 +18,12 @@ class RecordAdapter(context: Context, records: List<Record>) :
         val record = getItem(position)
 
         // Lookup view for data population
-        val itemUserID = view.findViewById<TextView>(R.id.item_userID)
-        val itemRecordID = view.findViewById<TextView>(R.id.item_recordID)
+        val custID = view.findViewById<TextView>(R.id.custID)
+        val recordID = view.findViewById<TextView>(R.id.recordID)
 
         // Populate the data into the template view using the data object
-        itemUserID.text = record?.userID
-        itemRecordID.text = "Record ID: ${record?.recordID}"
+        custID.text = "Cust ID: ${record?.custID}"
+        recordID.text = "Record ID: ${record?.recordID}"
 
         // Return the completed view to render on screen
         return view

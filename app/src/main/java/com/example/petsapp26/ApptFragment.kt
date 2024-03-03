@@ -59,6 +59,9 @@ private const val ARG_PARAM2 = "param2"
         private fun fetchAppointments() {
             val db = FirebaseFirestore.getInstance()
 
+            // clear existing appointments before fetching new ones
+            appointments.clear()
+
             db.collection("Appointments")
                 .get()
                 .addOnSuccessListener { documents ->

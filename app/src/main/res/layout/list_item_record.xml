@@ -5,7 +5,7 @@
     android:padding="8dp">
 
     <TextView
-        android:id="@+id/item_recordID"
+        android:id="@+id/recordID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentStart="true"
@@ -14,10 +14,10 @@
         android:textAppearance="?android:attr/textAppearanceListItem" />
 
     <TextView
-        android:id="@+id/item_userID"
+        android:id="@+id/custID"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/item_recordID"
+        android:layout_below="@id/recordID"
         android:layout_marginTop="7dp"
         android:text="Sub Item 1"
         android:textAppearance="?android:attr/textAppearanceListItemSmall" />
