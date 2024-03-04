@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ListView
 import androidx.fragment.app.Fragment
 import com.google.firebase.firestore.FirebaseFirestore
@@ -68,6 +69,18 @@ class RecordFragment : Fragment() {
             requireActivity().supportFragmentManager.beginTransaction().apply {
                 replace(R.id.fragment_container, recordDetailFragment)
                 addToBackStack(null)  // Add transaction to the back stack
+                commit()
+            }
+        }
+
+        // Set up the button click listener
+        val addButton: Button = view.findViewById(R.id.add_records_button)
+        addButton.setOnClickListener {
+            // Navigate to AddNewRecordFragment
+            val addNewRecordFragment = AddNewRecordFragment()
+            requireActivity().supportFragmentManager.beginTransaction().apply {
+                replace(R.id.fragment_container, addNewRecordFragment)
+                addToBackStack(null) // Adds the transaction to the back stack
                 commit()
             }
         }
