@@ -138,7 +138,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     supportFragmentManager.beginTransaction()
                         .replace(R.id.fragment_container, contactsFragment, "ContactsFragmentTag")
                         .commit()
-                    contactsFragment.fetchConversationsForAdmin()
+                    //contactsFragment.fetchConversationsForAdmin()
 
                 } else {
                     supportFragmentManager.beginTransaction()
@@ -148,7 +148,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                             "ContactsFragmentTag"
                         )
                         .commit()
-                    contactsFragment.fetchStaffMembers() // Call fetchStaffMembers function here
+                    //contactsFragment.fetchStaffMembers() // Call fetchStaffMembers function here
                     //contactsFragment.initRecyclerViewAdapter(emptyList()) // Initialize RecyclerView adapter here
                 }
             // Handle other menu items...
