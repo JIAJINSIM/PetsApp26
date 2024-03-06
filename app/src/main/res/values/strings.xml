@@ -18,7 +18,7 @@
 
     <string-array name="role_options">
         <item>user</item>
-        <item>specialist</item>
+        <item>admin</item>
     </string-array>
 
     <string name="profile_username">Username: %1$s\nUID: %2$s\nPassword: %3$s</string>
