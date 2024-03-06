@@ -9,8 +9,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.firestore.FirebaseFirestore
 import androidx.recyclerview.widget.LinearLayoutManager
-
-
+import com.google.android.gms.tasks.Tasks
 
 
 data class User(
@@ -50,10 +49,54 @@ class Contacts : Fragment() {
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val currentUserId = context?.let { PreferencesUtil.getCurrentUserId(it) }
 
-        fetchStaffMembers()
+        if (currentUserId != null) {
+            firestore.collection("users").document(currentUserId).get()
+                .addOnSuccessListener { document ->
+                    val userRole = document.getString("role")
+                    if (userRole == "admin") {
+                        fetchConversationsForAdmin()
+                        Log.d(TAG, "Admin user role fetchdatabaseonrole: $currentUserId")
+                    } else {
+                        fetchStaffMembers()
+                    }
+                }
+        }
     }
 
+    fun fetchConversationsForAdmin() {
+        val currentUserId = context?.let { PreferencesUtil.getCurrentUserId(it) }
+        firestore.collection("chats")
+            .whereEqualTo("receiver", currentUserId)
+            .get()
+            .addOnSuccessListener { documents ->
+                // Extract unique sender IDs from documents
+                val senderIds = documents.map { it.getString("sender") }.filterNotNull().toSet()
+
+                // Fetch details for each unique sender
+                fetchSenderDetails(senderIds)
+            }
+            .addOnFailureListener { exception ->
+                Log.w(TAG, "Error getting chat documents: ", exception)
+            }
+    }
+
+    fun fetchSenderDetails(senderIds: Set<String>) {
+        val users = mutableListOf<User>()
+
+        val tasks = senderIds.map { senderId ->
+            firestore.collection("users").document(senderId).get().addOnSuccessListener { documentSnapshot ->
+                val user = documentSnapshot.toObject(User::class.java)
+                user?.let { users.add(it) }
+            }
+        }
+
+        Tasks.whenAllComplete(tasks).addOnSuccessListener {
+            // Here users list contains details of all users who have sent messages to the admin
+            initRecyclerViewAdapter(users)
+        }
+    }
     fun fetchStaffMembers() {
         val currentUserId = context?.let { PreferencesUtil.getCurrentUserId(it) }
 
