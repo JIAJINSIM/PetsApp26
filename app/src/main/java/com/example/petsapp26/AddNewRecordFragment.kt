@@ -15,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 class AddNewRecordFragment : Fragment() {
 
     private lateinit var spinner: Spinner
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
