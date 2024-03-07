@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.tasks.Tasks
@@ -18,6 +19,17 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.PropertyName
 import com.google.firebase.firestore.QuerySnapshot
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import androidx.core.content.ContextCompat
+import android.Manifest
+import android.os.Looper
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 
 
 data class Message(
@@ -31,6 +43,8 @@ data class Message(
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+private lateinit var fusedLocationClient: FusedLocationProviderClient
+
 
 class Chat : Fragment() {
     private var param1: String? = null
@@ -68,14 +82,92 @@ class Chat : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter = ChatAdapter()
         recyclerView.adapter = adapter
-
+        // Initialize FusedLocationProviderClient
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
         fetchMessages()
         view.findViewById<Button>(R.id.buttonSendMessage).setOnClickListener {
         sendMessage()
         view.findViewById<EditText>(R.id.editTextMessage).text.clear() // Clear the input field after sending
     }
-
+        view.findViewById<Button>(R.id.buttonShareLocation).setOnClickListener {
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+                // Request the permission
+                requestPermissions(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
+            } else {
+                // Permission already granted, share the location
+                shareLocation()
+            }
+        }
     }
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        when (requestCode) {
+            MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION -> {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Permission was granted, proceed with sharing location
+                    shareLocation()
+                } else {
+                    // Permission denied, show a message to the user explaining why the permission is needed
+                    Toast.makeText(context, "Location permission is needed to share your location.", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+    private fun shareLocation() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Permission check logic and request if necessary
+            return
+        }
+
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            numUpdates = 1 // Get a single update of the location
+            maxWaitTime = 10000 // 10 seconds
+        }
+
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                val location = locationResult.locations.firstOrNull()
+                location?.let {
+                    val locationMessage = "Location: https://maps.google.com/?q=${it.latitude},${it.longitude}"
+                    sendLocationMessage(locationMessage)
+                } ?: run {
+                    Toast.makeText(context, "Unable to get current location.", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper()!!)
+    }
+    private fun sendLocationMessage(locationMessage: String) {
+        if (locationMessage.isNotEmpty()) {
+            val receiverId = arguments?.getString(ARG_PARAM1)
+            val currentUserId = PreferencesUtil.getCurrentUserId(requireContext())
+
+            val message = hashMapOf(
+                "sender" to currentUserId,
+                "receiver" to receiverId,
+                "message" to locationMessage,
+                "timestamp" to FieldValue.serverTimestamp()
+            )
+
+            firestore.collection("chats").add(message)
+                .addOnSuccessListener {
+                    Log.d(TAG, "Location sent successfully")
+                    fetchMessages()
+                    // Any additional handling after successfully sending the location
+                }
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "Failed to send location", e)
+                    // Handle failure
+                }
+        }
+    }
+
     private fun sendMessage() {
         val editTextMessage = view?.findViewById<EditText>(R.id.editTextMessage)
         val messageText = editTextMessage?.text.toString()
@@ -156,9 +248,12 @@ class Chat : Fragment() {
         }
     }
     companion object {
+        private const val MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
+
         @JvmStatic
         // Adjust parameter names as necessary
         fun newInstance(selectedUserId: String): Chat {
+
             val fragment = Chat()
             val args = Bundle().apply {
                 putString(ARG_PARAM1, selectedUserId)

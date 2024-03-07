@@ -24,7 +24,10 @@
         android:paddingStart="8dp"
         android:paddingTop="4dp"
         android:paddingEnd="8dp"
-        android:paddingBottom="4dp"/>
+        android:paddingBottom="4dp"
+        android:autoLink="web"
+        android:linksClickable="true"
+        android:textColorLink="@color/purple_500"/>
 
     <TextView
         android:id="@+id/timestampTextView"

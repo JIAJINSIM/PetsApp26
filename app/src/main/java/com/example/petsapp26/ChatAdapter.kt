@@ -1,4 +1,7 @@
 package com.example.petsapp26
+import android.text.SpannableString
+import android.text.method.LinkMovementMethod
+import android.text.util.Linkify
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,7 +19,17 @@ class ChatAdapter(private val messages: MutableList<Message> = mutableListOf()) 
 
         fun bind(message: Message) {
             //senderTextView.text = message.sender
-            messageTextView.text = message.message
+            // Check if the message is a location link
+            if (message.message.startsWith("Location: https://maps.google.com/?q=")) {
+                // This makes sure the link is clickable
+                val spannableString = SpannableString(message.message)
+                Linkify.addLinks(spannableString, Linkify.WEB_URLS)
+                messageTextView.text = spannableString
+                messageTextView.movementMethod = LinkMovementMethod.getInstance()
+            } else {
+                // Normal text message
+                messageTextView.text = message.message
+            }
             // Format timestamp
             val formattedDateTime = dateTimeFormat.format(message.timestamp.toDate())
             timestampTextView.text = formattedDateTime
