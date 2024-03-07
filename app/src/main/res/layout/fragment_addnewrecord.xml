@@ -1,33 +1,92 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:padding="16dp"
         tools:context=".AddNewRecordFragment">
 
-        <!-- Description EditText -->
+        <!-- DropDown for selecting customerID -->
+        <Spinner
+            android:id="@+id/custID_dropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp" />
+
+        <!-- DropDown for selecting apptID -->
+        <Spinner
+            android:id="@+id/apptID_dropdown"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp" />
+
+
+        <!-- Description Multiline EditText (Textbox) -->
         <EditText
             android:id="@+id/et_description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="top|start"
             android:hint="Description"
-            android:inputType="text" />
+            android:inputType="textMultiLine"
+            android:maxLines="10"
+            android:minLines="3"
+            android:scrollbars="vertical" />
 
         <!-- Diagnosis EditText -->
         <EditText
             android:id="@+id/et_diagnosis"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="top|start"
             android:hint="Diagnosis"
-            android:inputType="text" />
+            android:inputType="textMultiLine"
+            android:maxLines="10"
+            android:minLines="3"
+            android:scrollbars="vertical" />
+
+        <!-- Symptoms EditText -->
+        <EditText
+            android:id="@+id/et_symptoms"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top|start"
+            android:hint="Symptoms"
+            android:inputType="textMultiLine"
+            android:maxLines="10"
+            android:minLines="3"
+            android:scrollbars="vertical" />
+
+        <!-- Treatment EditText -->
+        <EditText
+            android:id="@+id/et_treatment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top|start"
+            android:hint="Treatment"
+            android:inputType="textMultiLine"
+            android:maxLines="10"
+            android:minLines="3"
+            android:scrollbars="vertical" />
+
+        <!-- Prescription EditText -->
+        <EditText
+            android:id="@+id/et_prescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top|start"
+            android:hint="Prescription"
+            android:inputType="textMultiLine"
+            android:maxLines="10"
+            android:minLines="3"
+            android:scrollbars="vertical" />
 
         <!-- Add more fields as necessary -->
 
@@ -36,8 +95,8 @@
             android:id="@+id/btn_submit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Submit"
-            android:layout_gravity="center_horizontal" />
+            android:layout_gravity="center_horizontal"
+            android:text="Submit" />
 
     </LinearLayout>
 </ScrollView>

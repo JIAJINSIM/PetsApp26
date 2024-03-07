@@ -1,16 +1,20 @@
 package com.example.petsapp26
 
+import CustomArrayAdapter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
+import android.widget.Spinner
 import androidx.fragment.app.Fragment
 import com.google.firebase.firestore.FirebaseFirestore
 
 class AddNewRecordFragment : Fragment() {
 
+    private lateinit var spinner: Spinner
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -21,6 +25,8 @@ class AddNewRecordFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        spinner = view.findViewById(R.id.custID_dropdown)
+        fetchItemsFromFirebase()
 
         val btnSubmit: Button = view.findViewById(R.id.btn_submit)
         btnSubmit.setOnClickListener {
@@ -45,4 +51,31 @@ class AddNewRecordFragment : Fragment() {
                 }
         }
     }
+
+    private fun fetchItemsFromFirebase() {
+        val db = FirebaseFirestore.getInstance()
+        val items = mutableListOf("Select CustomerID")
+
+        // Query the "users" collection for documents where the role is "user"
+        db.collection("users")
+            .whereEqualTo("role", "user")
+            .get()
+            .addOnSuccessListener { documents ->
+                for (document in documents) {
+                    // Get the document ID
+                    val userId = document.id
+                    items.add(userId)
+                }
+                if (items.isNotEmpty()) {
+                    val adapter = CustomArrayAdapter(requireContext(), items)
+                    spinner.adapter = adapter
+                    spinner.setSelection(0)
+                } else {
+                    // Handle the case where no users with the role "user" were found
+                }
+            }.addOnFailureListener { exception ->
+                // Handle any errors here
+            }
+    }
 }
+
