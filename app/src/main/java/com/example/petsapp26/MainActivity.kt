@@ -129,13 +129,28 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
         Log.d("MainActivity", "ContactsFragment added with tag: ContactsFragment, $contactsFragment" )
         when (item.itemId) {
             R.id.nav_contacts -> {
+                val userRole = getUserRole()
+                if (userRole == "admin") {
 
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.fragment_container, Contacts.newInstance("param1", "param2"), "ContactsFragmentTag")
-                    .commit()
-                contactsFragment.fetchStaffMembers() // Call fetchStaffMembers function here
-                //contactsFragment.initRecyclerViewAdapter(emptyList()) // Initialize RecyclerView adapter here
 
+                    // For admin, prepare and show admin view
+                    val contactsFragment = Contacts.newInstance("param1", "admin")
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.fragment_container, contactsFragment, "ContactsFragmentTag")
+                        .commit()
+                    //contactsFragment.fetchConversationsForAdmin()
+
+                } else {
+                    supportFragmentManager.beginTransaction()
+                        .replace(
+                            R.id.fragment_container,
+                            Contacts.newInstance("param1", "param2"),
+                            "ContactsFragmentTag"
+                        )
+                        .commit()
+                    //contactsFragment.fetchStaffMembers() // Call fetchStaffMembers function here
+                    //contactsFragment.initRecyclerViewAdapter(emptyList()) // Initialize RecyclerView adapter here
+                }
             // Handle other menu items...
             }
             R.id.nav_login -> supportFragmentManager.beginTransaction()
