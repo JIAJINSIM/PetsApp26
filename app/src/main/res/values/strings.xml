@@ -34,5 +34,10 @@
     <string name="show_filters">Other Filters</string>
     <string name="hide_filters">Hide Filters</string>
 
+    <!-- strings for the Share fragment -->
+    <string name="share_app_description">Share our app with your friends</string>
+    <string name="share_instruction">Let your friends know about our app by sharing it with them directly. Share and connect more pet lovers with our community.</string>
+    <string name="share_with_contacts">Share with Contacts</string>
+
 
 </resources>

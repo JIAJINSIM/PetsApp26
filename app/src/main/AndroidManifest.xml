@@ -11,6 +11,10 @@
     <!-- (Optional) Used for receiving location updates in the background -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
+    <!--    To retrieve contacts-->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+
 
     <application
         android:allowBackup="true"

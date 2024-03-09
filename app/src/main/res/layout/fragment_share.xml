@@ -6,11 +6,49 @@
     android:layout_height="match_parent"
     tools:context=".ShareFragment">
     <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Share Fragment"
-        android:textSize="30sp"
-        android:layout_centerInParent="true"
-        android:textColor="@color/lavender"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="16dp"
+        tools:context=".ShareFragment"
+        android:background="@color/white">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Help us grow our community!"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="@string/share_app_description"
+            android:scaleType="centerCrop"
+            android:src="@drawable/sharecontactsimg" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/share_instruction"
+            android:textAppearance="?attr/textAppearanceHeadline6"
+            android:gravity="center"
+            android:layout_marginBottom="16dp"/>
+
+        <Button
+            android:id="@+id/btn_share_with_contacts"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/share_with_contacts"
+            android:textColor="@color/white"
+            android:drawablePadding="8dp"
+            android:padding="12dp"/>
+
+    </LinearLayout>
+
+
 </RelativeLayout>
