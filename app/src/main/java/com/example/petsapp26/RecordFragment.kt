@@ -101,8 +101,9 @@ class RecordFragment : Fragment() {
             .addOnSuccessListener { documents ->
                 for (document in documents) {
                     val custIDRef = document.getDocumentReference("custID")
-                    val recordID = document.getString("recordID")
-                    val petIDRef = document.getDocumentReference("petID")
+//                    val recordID = document.getString("recordID")
+                    val recordID = document.id
+//                    val petIDRef = document.getDocumentReference("petID")
 
                     val description = document.getString("description")
                     val diagnosis = document.getString("diagnosis")
@@ -115,7 +116,7 @@ class RecordFragment : Fragment() {
 //                        val custID = custDoc.id
 
 
-                        val record = Record(recordID, custIDRef?.id,description, diagnosis,petIDRef?.id, prescription,symptoms,treatment )
+                        val record = Record(recordID, custIDRef?.id,description, diagnosis, prescription,symptoms,treatment )
 
                         records.add(record)
 

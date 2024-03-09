@@ -28,7 +28,7 @@ class RecordDetailFragment : Fragment() {
         // Use the record to populate the views
         view.findViewById<TextView>(R.id.recordID).text = "Record ID: ${record?.recordID}"
         view.findViewById<TextView>(R.id.custID).text = "Customer ID: ${record?.custID}"
-        view.findViewById<TextView>(R.id.petID).text = "Pet ID: ${record?.petID}"
+//        view.findViewById<TextView>(R.id.petID).text = "Pet ID: ${record?.petID}"
         view.findViewById<TextView>(R.id.description).text = record?.description
         view.findViewById<TextView>(R.id.diagnosis).text = record?.diagnosis
         view.findViewById<TextView>(R.id.symptoms).text = record?.symptoms

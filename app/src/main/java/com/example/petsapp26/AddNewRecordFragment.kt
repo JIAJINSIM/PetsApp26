@@ -40,7 +40,8 @@ class AddNewRecordFragment : Fragment() {
         // Initialize the spinner and set it to be not clickable initially
         spinner_apptID = view.findViewById(R.id.apptID_dropdown)
         spinner_apptID.isClickable = false
-        spinner_apptID.isEnabled = false // Disable the spinner
+        spinner_apptID.isEnabled = true // Disable the spinner
+        spinner_apptID.setSelection(0)
 
         // Set up listener for customer ID spinner
         spinner_custID.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
@@ -62,13 +63,15 @@ class AddNewRecordFragment : Fragment() {
                     // If "Select CustomerID" (hint) is selected, ensure apptID spinner is not clickable
                     spinner_apptID.isClickable = false
                     spinner_apptID.isEnabled = false
+                    spinner_apptID.setSelection(0)
                 }
             }
 
             override fun onNothingSelected(parent: AdapterView<*>?) {
                 // If nothing is selected, the apptID spinner should not be clickable
                 spinner_apptID.isClickable = false
-                spinner_apptID.isEnabled = false
+                spinner_apptID.isEnabled = true
+                spinner_apptID.setSelection(0)
             }
         }
 
@@ -100,39 +103,53 @@ class AddNewRecordFragment : Fragment() {
             if (selectedUserID == null || selectedApptID == null) {
                 Toast.makeText(requireContext(), "Please select a valid customer and an appointment.", Toast.LENGTH_LONG).show()
                 return@setOnClickListener
+            } else {
+
+
+                // Convert selected IDs to DocumentReferences
+                val custRef =
+                    FirebaseFirestore.getInstance().collection("users").document(selectedUserID!!)
+                val apptRef = FirebaseFirestore.getInstance().collection("Appointments")
+                    .document(selectedApptID!!)
+
+
+                // Then, add the record to Firestore
+                val newRecord = hashMapOf(
+                    "custID" to custRef,
+                    "apptID" to apptRef,
+                    "description" to description,
+                    "diagnosis" to diagnosis,
+                    "symptoms" to symptoms,
+                    "treatment" to treatment,
+                    "prescription" to prescription
+                )
+
+                FirebaseFirestore.getInstance().collection("Records").add(newRecord)
+                    .addOnSuccessListener {
+                        // Handle success, maybe navigate back or show a success message
+                        Toast.makeText(
+                            requireContext(),
+                            "Record added successfully.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                        requireActivity().supportFragmentManager.popBackStack()
+                    }
+                    .addOnFailureListener { exception ->
+                        // handle failure
+                        Toast.makeText(
+                            requireContext(),
+                            "Error adding record: ${exception.message}",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
             }
-
-            // Convert selected IDs to DocumentReferences
-            val custRef = FirebaseFirestore.getInstance().collection("users").document(selectedUserID!!)
-            val apptRef = FirebaseFirestore.getInstance().collection("Appointments").document(selectedApptID!!)
-
-
-            // Then, add the record to Firestore
-            val newRecord = hashMapOf(
-                "custID" to custRef,
-                "apptID" to apptRef,
-                "description" to description,
-                "diagnosis" to diagnosis,
-                "symptoms" to symptoms,
-                "treatment" to treatment,
-                "prescription" to prescription
-            )
-
-            FirebaseFirestore.getInstance().collection("Records").add(newRecord)
-                .addOnSuccessListener {
-                    // Handle success, maybe navigate back or show a success message
-                    Toast.makeText(requireContext(), "Record added successfully.", Toast.LENGTH_SHORT).show()
-                }
-                .addOnFailureListener { exception ->
-                    // handle failure
-                    Toast.makeText(requireContext(), "Error adding record: ${exception.message}", Toast.LENGTH_SHORT).show()
-                }
         }
     }
 
     private fun fetchItemsFromFirebase() {
         val db = FirebaseFirestore.getInstance()
         val items = mutableListOf("Select CustomerID")
+        val temp = mutableListOf("Select AppointmentID")
 
         // Query the "users" collection for documents where the role is "user"
         db.collection("users")
@@ -148,8 +165,17 @@ class AddNewRecordFragment : Fragment() {
                     val adapter = CustomArrayAdapter(requireContext(), items)
                     spinner_custID.adapter = adapter
                     spinner_custID.setSelection(0)
+
+                    val adapter2 = CustomArrayAdapter(requireContext(), temp)
+                    spinner_apptID.adapter = adapter2
+                    spinner_apptID.setSelection(0)
                 } else {
                     // Handle the case where no users with the role "user" were found
+                    Toast.makeText(
+                        requireContext(),
+                        "No available customerIDs",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }.addOnFailureListener { exception ->
                 // Handle any errors here
@@ -194,6 +220,15 @@ class AddNewRecordFragment : Fragment() {
                             spinner_apptID.isEnabled = true
                         } else {
                             // Handle case where there are no available appointments
+                            // Notify the user with a Toast or some other indicator.
+                            Toast.makeText(requireContext(), "No available appointments for the selected customer.", Toast.LENGTH_LONG).show()
+
+                            // Clear the spinner and disable it to prevent user interaction.
+                            val noOptionsAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, listOf("No appointments available"))
+                            spinner_apptID.adapter = noOptionsAdapter
+                            spinner_apptID.setSelection(0)
+                            spinner_apptID.isClickable = false
+                            spinner_apptID.isEnabled = false
                         }
                     }
                     .addOnFailureListener { exception ->
@@ -208,46 +243,5 @@ class AddNewRecordFragment : Fragment() {
     }
 
 
-
-//    private fun fetchApptIDFromFirebase(selectedCustID: String) {
-//        val db = FirebaseFirestore.getInstance()
-//        val appointmentsList = mutableListOf("Select AppointmentID")
-//
-//        // Create a DocumentReference to the selected customer
-//        val userRef = db.collection("users").document(selectedCustID)
-//
-//
-//        spinner_apptID.setSelection(0)
-//
-//
-//        // Query the "Appointments" collection for documents where the custID field matches the selected Customer ID
-//        db.collection("Appointments")
-//            .whereEqualTo(
-//                "custID",
-//                userRef
-//            ) // Assumes custID field in Firestore contains the full path
-//            .get()
-//            .addOnSuccessListener { documents ->
-//                // Log the count of documents fetched
-//                Log.d("FetchAppt", "Number of appointments fetched: ${documents.size()}")
-//                for (document in documents) {
-//                    // Here we can use either the document ID or the apptID field, if you want to use the apptID field from the document change the below line accordingly
-//                    val apptId =
-//                        document.id // This is the Firestore document ID, used if apptID field is the same as document ID.
-//                    // val apptId = document.getString("apptID") // Use if apptID is a field in the Firestore document
-//                    appointmentsList.add(apptId)
-//                }
-//                if (appointmentsList.size > 1) { // More than just the initial "Select AppointmentID" means we have valid appointments
-//                    val adapter = CustomArrayAdapter(requireContext(), appointmentsList)
-//                    spinner_apptID.adapter = adapter
-//                    spinner_apptID.setSelection(0)
-//                } else {
-//                    // Handle case where there are no appointments for this user
-//                }
-//            }.addOnFailureListener { exception ->
-//                // Handle any errors here, such as a Toast or a log
-//            }
-//
-//    }
 }
 

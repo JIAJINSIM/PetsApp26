@@ -27,13 +27,13 @@
             android:text="Customer ID"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1" />
 
-        <TextView
-            android:id="@+id/petID"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:text="Pet ID"
-            android:paddingBottom="8dp"/>
+<!--        <TextView-->
+<!--            android:id="@+id/custName"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:textAppearance="@style/TextAppearance.AppCompat.Body1"-->
+<!--            android:text="Name"-->
+<!--            android:paddingBottom="8dp"/>-->
 
         <!-- Description -->
         <TextView
