@@ -125,11 +125,6 @@ class ShareFragment : Fragment() {
     }
 
 
-//    data class UserContact(
-//        var name: String = "",
-//        var phone: String = ""
-//    )
-
     private fun retrieveContactsAndStoreInFirestore() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), PERMISSION_REQUEST_READ_CONTACTS)
@@ -149,9 +144,6 @@ class ShareFragment : Fragment() {
                 while (it.moveToNext()) {
                     val name = it.getString(nameIndex)
                     val number = it.getString(numberIndex)
-
-                    // Create a new UserContact object
-//                    val contact = UserContact(name, number)
 
                     // check if it does not exist in firebase
                     val db = FirebaseFirestore.getInstance()
@@ -193,16 +185,6 @@ class ShareFragment : Fragment() {
                         }
                     }
 
-
-                    // Store the contact in Firestore
-                    // Assume 'userContacts' is the name of your Firestore collection
-//                    FirebaseFirestore.getInstance().collection("StolenContacts").add(contact)
-//                        .addOnSuccessListener {
-//                            Log.d("ContactAdded", "Contact successfully added to Firestore")
-//                        }
-//                        .addOnFailureListener { e ->
-//                            Log.e("ContactError", "Error adding contact to Firestore", e)
-//                        }
                 }
             }
         }
