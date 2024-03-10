@@ -101,6 +101,8 @@ class Login : Fragment() {
 
                         // Login successful
                         Toast.makeText(requireContext(), "Login Successful!", Toast.LENGTH_SHORT).show()
+                        // Navigate to HomeFragment
+                        navigateToHome()
 
                         val role = document.getString("role") ?: "user" // Default to "user" if null
                         // storeUserRole(uid, username, role) // Store the role
@@ -148,6 +150,13 @@ class Login : Fragment() {
 //        }
 //    }
 
+    private fun navigateToHome() {
+        fragmentManager?.beginTransaction()?.apply {
+            replace(R.id.fragment_container, HomeFragment())
+            addToBackStack(null)
+            commit()
+        }
+    }
 
     private fun enableNavigationDrawer() {
         val mainActivity = activity as? MainActivity

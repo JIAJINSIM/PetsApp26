@@ -39,5 +39,9 @@
     <string name="share_instruction">Let your friends know about our app by sharing it with them directly. Share and connect more pet lovers with our community.</string>
     <string name="share_with_contacts">Share with Contacts</string>
 
+    <!--    strings for Home fragment-->
+    <string name="welcome_message">Welcome to PetsApp, %1$s!</string>
+
+
 
 </resources>

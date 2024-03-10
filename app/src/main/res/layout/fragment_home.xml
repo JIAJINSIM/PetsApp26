@@ -1,16 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".HomeFragment">
-    <!-- TODO: Update blank fragment layout -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+    android:padding="16dp"
+    tools:context=".HomeFragment">
+
+    <!-- App logo -->
+    <ImageView
+        android:id="@+id/app_logo_home"
+        android:layout_width="wrap_content"
+        android:layout_height="150dp"
+        android:src="@drawable/pet"
+        android:contentDescription="petsapp logo"
+        android:layout_marginTop="70dp"
+    android:layout_gravity="center_horizontal" />
+
+    <!-- Welcome Message -->
+    <TextView
+        android:id="@+id/welcome_message"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Welcome to PetsApp26!"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:layout_marginTop="24dp"/>
+
+<!--    <TextView-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:text="Explore our features to connect with vets and manage your pet's health."-->
+<!--        android:gravity="center"-->
+<!--        android:layout_marginTop="16dp"/>-->
+
+    <!-- Hint to Open Navigation Drawer -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Home Fragment"
-        android:textSize="30sp"
-        android:layout_centerInParent="true"
-        android:textColor="@color/lavender"/>
-</RelativeLayout>
+        android:text="Tap the menu icon on the top left to explore"
+        android:gravity="center"
+        android:layout_marginTop="32dp"
+        android:textStyle="italic"/>
+</LinearLayout>
+    </RelativeLayout>

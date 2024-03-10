@@ -8,15 +8,12 @@
     android:padding="16dp"
     tools:context=".Login">
 
-
-
     <ImageView
         android:id="@+id/app_logo"
         android:layout_width="wrap_content"
         android:layout_height="150dp"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
         android:layout_marginTop="70dp"
+        android:layout_gravity="center_horizontal"
         android:src="@drawable/pet" />
 
     <TextView
@@ -29,22 +26,53 @@
         android:textStyle="bold"
         android:layout_marginTop="20dp"/>
 
-    <EditText
-        android:id="@+id/username"
+    <!-- Username input -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="16dp"
-        android:hint="Username"
-        android:inputType="text" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="30dp">
 
-    <EditText
-        android:id="@+id/password"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="USERNAME:"
+            android:layout_marginEnd="8dp"/> <!-- Adjust margin as needed -->
+
+        <EditText
+            android:id="@+id/username"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@drawable/edit_text_border"
+            android:padding="10dp"
+            android:inputType="text"/>
+    </LinearLayout>
+
+    <!-- Password input -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:hint="Password"
-        android:inputType="textPassword" />
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="PASSWORD:"
+            android:layout_marginEnd="8dp"/> <!-- Adjust margin as needed -->
+
+        <EditText
+            android:id="@+id/password"
+            android:layout_width="0dp"
+            android:layout_height="40dp"
+            android:layout_weight="1"
+            android:background="@drawable/edit_text_border"
+            android:padding="10dp"
+            android:inputType="textPassword"/>
+    </LinearLayout>
 
     <Button
         android:id="@+id/login"
@@ -64,5 +92,4 @@
         android:clickable="true"
         android:focusable="true"
         android:onClick="onRegisterLinkClick" />
-
 </LinearLayout>

@@ -6,10 +6,8 @@
 
     <group
         android:checkableBehavior="single">
-        <item
-            android:id="@+id/nav_login"
-            android:icon="@drawable/baseline_login_24"
-            android:title="Logout" />
+
+
         <item
             android:id="@+id/nav_contacts"
             android:icon="@drawable/baseline_perm_contact_calendar_24"
@@ -38,10 +36,6 @@
             android:icon="@drawable/baseline_settings_24"
             android:title="Settings"/>
 
-        <item
-            android:id="@+id/nav_share"
-            android:icon="@drawable/baseline_share_24"
-            android:title="Share"/>
 
         <item
             android:id="@+id/nav_about"
@@ -51,6 +45,7 @@
 
     </group>
     <item
+        android:id="@+id/nav_login"
         android:title="">
 
         <menu>
