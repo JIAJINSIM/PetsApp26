@@ -59,5 +59,10 @@ class ChatAdapter(private val messages: MutableList<Message> = mutableListOf()) 
 
     }
 
+    fun clearData() {
+        messages.clear() // Assuming messageList is the list holding your data.
+        notifyDataSetChanged()
+    }
+
 
 }

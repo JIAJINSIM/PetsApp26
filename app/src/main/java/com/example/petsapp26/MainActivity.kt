@@ -125,6 +125,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
         val contactsFragment = Contacts.newInstance("param1", "param2")
+
 // Add this log before committing the transaction to add the ContactsFragment
         Log.d("MainActivity", "ContactsFragment added with tag: ContactsFragment, $contactsFragment" )
         when (item.itemId) {
@@ -156,7 +157,7 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             R.id.nav_login -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, Login()).commit()
             R.id.nav_chat -> supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, Chat()).commit()
+                .replace(R.id.fragment_container, Chat(),"CHAT_FRAGMENT_TAG").commit()
             R.id.nav_home -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, HomeFragment()).commit()
             R.id.nav_search -> supportFragmentManager.beginTransaction()
@@ -192,6 +193,11 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 // Display logout message
                 Toast.makeText(this, "Logged out!", Toast.LENGTH_SHORT).show()
 
+                // Find the Chat fragment and clear its data
+                val chatFragment = supportFragmentManager.findFragmentByTag("CHAT_FRAGMENT_TAG") as? Chat
+                chatFragment?.clearChatData()
+
+
                 // Disable navigation drawer
                 disableNavigationDrawer()
                 // Clear staff list adapter data
@@ -205,8 +211,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                     .commit()
 
                 // Clear back stack to prevent going back to the secured fragments
-                supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
-
+                //supportFragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE)
+                //removed the line above because after chat logout, the navigation ui and keyboard cannot type. 11_3_2024
             }
         }
         drawerLayout.closeDrawer(GravityCompat.START)

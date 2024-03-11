@@ -49,6 +49,7 @@ class Login : Fragment() {
         val loginButton = binding.login
         val registerLink = binding.registerLink
 
+        binding.username.requestFocus()
 
         loginButton.setOnClickListener {
             val username = usernameEditText.text.toString()
@@ -97,7 +98,7 @@ class Login : Fragment() {
                         println(documentId)
                         // storeUserRole(uid, username,document.getString("role") ?: "user")
                         // updateNavigationView(document.getString("role") ?: "user")
-                        enableNavigationDrawer()
+                        //enableNavigationDrawer()
 
                         // Login successful
                         Toast.makeText(requireContext(), "Login Successful!", Toast.LENGTH_SHORT).show()

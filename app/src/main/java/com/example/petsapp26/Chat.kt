@@ -18,18 +18,23 @@ import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.PropertyName
-import com.google.firebase.firestore.QuerySnapshot
-import android.content.Context
 import android.content.pm.PackageManager
-import android.location.LocationManager
 import androidx.core.content.ContextCompat
 import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.IntentSender
 import android.os.Looper
+import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsResponse
+import com.google.android.gms.location.SettingsClient
+import com.google.android.gms.tasks.Task
 
 
 data class Message(
@@ -78,7 +83,7 @@ class Chat : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recyclerView = view.findViewById<RecyclerView>(R.id.recyclerView) // Initialization moved here
+        recyclerView = view.findViewById(R.id.recyclerView) // Initialization moved here
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         adapter = ChatAdapter()
         recyclerView.adapter = adapter
@@ -88,7 +93,10 @@ class Chat : Fragment() {
         view.findViewById<Button>(R.id.buttonSendMessage).setOnClickListener {
         sendMessage()
         view.findViewById<EditText>(R.id.editTextMessage).text.clear() // Clear the input field after sending
+
     }
+        // Store location in Firestore when the chat view is created
+        storelocationwhenchat()
         view.findViewById<Button>(R.id.buttonShareLocation).setOnClickListener {
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -128,6 +136,34 @@ class Chat : Fragment() {
             maxWaitTime = 10000 // 10 seconds
         }
 
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
+        val settingsClient: SettingsClient = LocationServices.getSettingsClient(requireActivity())
+        val task: Task<LocationSettingsResponse> = settingsClient.checkLocationSettings(builder.build())
+
+        task.addOnSuccessListener {
+            getLocationUpdates(locationRequest)
+        }
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException) {
+                try {
+                    startIntentSenderForResult(exception.resolution.intentSender, REQUEST_CHECK_SETTINGS, null, 0, 0, 0, null)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                }
+            }
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == REQUEST_CHECK_SETTINGS) {
+            if (resultCode == Activity.RESULT_OK) {
+                shareLocation()
+            } else {
+                Toast.makeText(context, "Location not enabled", Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+    private fun getLocationUpdates(locationRequest: LocationRequest) {
         val locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -140,9 +176,71 @@ class Chat : Fragment() {
                 }
             }
         }
+        // Explicitly check for permissions again
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            try {
+                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper()!!)
+            } catch (e: SecurityException) {
+                // Handle the security exception
+                Toast.makeText(context, "Location permission not granted", Toast.LENGTH_SHORT).show()
+            }
+        } else {
+            // Permissions not granted, handle accordingly
+            Toast.makeText(context, "Location permission not granted", Toast.LENGTH_SHORT).show()
+        }
+    }
 
+    private fun storelocationwhenchat() {
+        // Check if location permissions are granted
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Location permission not granted. Not storing location.")
+            return // Early return if no permission
+        }
+
+        // Assuming you have a way to get the current user's ID or username
+        val currentUserId = PreferencesUtil.getCurrentUserId(requireContext())
+        if (currentUserId == null) {
+            Log.d(TAG, "No current user session found. Not storing location.")
+            return // Early return if no user session
+        }
+
+        // Create location request
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            numUpdates = 1 // Only need a single update
+            maxWaitTime = 10000 // Wait at most 10 seconds
+        }
+
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                val location = locationResult.locations.firstOrNull()
+                location?.let {
+                    // Include the current user's session info with the location data
+                    val locationData = hashMapOf(
+                        "userId" to currentUserId,
+                        "latitude" to location.latitude,
+                        "longitude" to location.longitude,
+                        "timestamp" to FieldValue.serverTimestamp()
+                    )
+
+                    firestore.collection("userLocations").add(locationData)
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Location and user session stored successfully.")
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error storing location and user session", e)
+                        }
+                } ?: Log.d(TAG, "Unable to get location.")
+            }
+        }
+
+        // Request location updates with the settings defined above
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper()!!)
     }
+
+
+
     private fun sendLocationMessage(locationMessage: String) {
         if (locationMessage.isNotEmpty()) {
             val receiverId = arguments?.getString(ARG_PARAM1)
@@ -247,8 +345,15 @@ class Chat : Fragment() {
             recyclerView.scrollToPosition(adapter.itemCount - 1)
         }
     }
+
+    fun clearChatData() {
+        adapter.clearData() // This assumes you have a method called clearData in your ChatAdapter that clears the data list and notifies the adapter.
+    }
+
+
     companion object {
         private const val MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1
+        private const val REQUEST_CHECK_SETTINGS = 1001 // Add this line
 
         @JvmStatic
         // Adjust parameter names as necessary
