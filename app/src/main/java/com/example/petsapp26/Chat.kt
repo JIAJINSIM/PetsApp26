@@ -35,6 +35,7 @@ import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.SettingsClient
 import com.google.android.gms.tasks.Task
+import com.google.firebase.firestore.DocumentChange
 
 
 data class Message(
@@ -89,7 +90,7 @@ class Chat : Fragment() {
         recyclerView.adapter = adapter
         // Initialize FusedLocationProviderClient
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireActivity())
-        fetchMessages()
+        fetchMessagesAndUsernames()
         view.findViewById<Button>(R.id.buttonSendMessage).setOnClickListener {
         sendMessage()
         view.findViewById<EditText>(R.id.editTextMessage).text.clear() // Clear the input field after sending
@@ -256,7 +257,7 @@ class Chat : Fragment() {
             firestore.collection("chats").add(message)
                 .addOnSuccessListener {
                     Log.d(TAG, "Location sent successfully")
-                    fetchMessages()
+                    fetchMessagesAndUsernames()
                     // Any additional handling after successfully sending the location
                 }
                 .addOnFailureListener { e ->
@@ -284,7 +285,7 @@ class Chat : Fragment() {
                 .addOnSuccessListener {
                     Log.d(TAG, "Message sent successfully")
                     editTextMessage?.text?.clear() // Correctly clear the text field
-                    fetchMessages() // Adjusted: No need to pass adapter as it's a class variable
+                    fetchMessagesAndUsernames() // Adjusted: No need to pass adapter as it's a class variable
                 }
                 .addOnFailureListener { e ->
                     Log.e(TAG, "Failed to send message", e)
@@ -293,32 +294,110 @@ class Chat : Fragment() {
     }
 
 
-    private fun fetchMessages() {
+    private fun fetchMessagesAndUsernames() {
         val selectedUserId = arguments?.getString(ARG_PARAM1)
         val currentUserId = PreferencesUtil.getCurrentUserId(requireContext())
 
-        Log.d(TAG, "currentuserID from fetchMessage:, $currentUserId")
-        // Start with messages where the current user is the sender.
+        if (currentUserId == null || selectedUserId == null) {
+            Log.w(TAG, "Current or selected user ID is null.")
+            return
+        }
+
+        // This set will hold all user IDs for which we need to fetch usernames.
+        val userIdsToFetch = mutableSetOf(currentUserId, selectedUserId)
+
+        // Map to store usernames for user IDs.
+        val usernamesMap = mutableMapOf<String, String>()
+
+        // Initially fetch usernames to ensure we have them before messages start coming in.
+        fetchUsernames(userIdsToFetch) { fetchedUsernamesMap ->
+            usernamesMap.putAll(fetchedUsernamesMap)
+
+            // After fetching usernames, start listening for messages.
+            listenForMessages(currentUserId, selectedUserId, usernamesMap)
+        }
+    }
+
+    private fun fetchUsernames(userIds: Set<String>, onComplete: (Map<String, String>) -> Unit) {
+        val tasks = userIds.map { userId ->
+            firestore.collection("users").document(userId).get()
+        }
+
+        Tasks.whenAllSuccess<DocumentSnapshot>(tasks).addOnSuccessListener { documents ->
+            val usernamesMap: Map<String, String> = documents.mapNotNull { document ->
+                val userId = document.id
+                val username = document.getString("username") ?: "Unknown" // Provide a default value for null usernames
+                userId to username
+            }.toMap()
+            onComplete(usernamesMap)
+        }
+    }
+
+
+    private fun listenForMessages(currentUserId: String, selectedUserId: String, usernamesMap: MutableMap<String, String>) {
+        val messages = mutableListOf<Message>()
+
         firestore.collection("chats")
-            .whereEqualTo("sender", currentUserId)
-            .whereEqualTo("receiver", selectedUserId)
-            .get()
-            .addOnSuccessListener { documents1 ->
-                val messages = documents1.mapNotNull { it.toObject(Message::class.java) }.toMutableList()
+            .whereIn("sender", listOf(currentUserId, selectedUserId))
+            .whereIn("receiver", listOf(currentUserId, selectedUserId))
+            .orderBy("timestamp")
+            .addSnapshotListener { snapshots, e ->
+                if (e != null) {
+                    Log.w(TAG, "Listen failed.", e)
+                    return@addSnapshotListener
+                }
 
-                // Next, fetch messages where the current user is the receiver.
-                firestore.collection("chats")
-                    .whereEqualTo("sender", selectedUserId)
-                    .whereEqualTo("receiver", currentUserId)
-                    .get()
-                    .addOnSuccessListener { documents2 ->
-                        messages.addAll(documents2.mapNotNull { it.toObject(Message::class.java) })
-
-                        // Continue with username fetching and updating UI...
-                        fetchUsernames(messages.map { it.sender }.toSet(), messages)
+                val documentChanges = snapshots?.documentChanges ?: return@addSnapshotListener
+                for (change in documentChanges) {
+                    val message = change.document.toObject(Message::class.java)
+                    when (change.type) {
+                        DocumentChange.Type.ADDED -> {
+                            // Assign fetched usernames
+                            message.senderUsername = usernamesMap[message.sender] ?: "Unknown"
+                            messages.add(message)
+                        }
+                        DocumentChange.Type.MODIFIED -> {
+                            // Handle modifications if necessary
+                        }
+                        DocumentChange.Type.REMOVED -> {
+                            // Handle removals if necessary
+                        }
                     }
+                }
+
+                // Sort and update UI
+                messages.sortBy { it.timestamp }
+                adapter.updateData(messages)
+                recyclerView.scrollToPosition(adapter.itemCount - 1)
             }
     }
+
+
+
+    private fun fetchUsernamesAndUpdate(messages: List<Message>) {
+        val userIds = messages.map { it.sender }.toSet()
+
+        Tasks.whenAllSuccess<DocumentSnapshot>(userIds.map { userId ->
+            firestore.collection("users").document(userId).get()
+        }).addOnSuccessListener { documents ->
+            val usernameMap = documents.mapNotNull { it.toObject(User::class.java) }.associateBy { it.userId }.mapValues { it.value.username }
+
+            val updatedMessages = messages.map { message ->
+                message.apply { senderUsername = usernameMap[sender] ?: "Unknown" }
+            }.sortedBy { it.timestamp }
+
+            adapter.updateData(updatedMessages)
+            recyclerView.scrollToPosition(adapter.itemCount - 1)
+        }
+    }
+
+    data class User(
+        val userId: String = "",
+        val username: String = "",
+        // Include other fields as necessary
+    )
+
+
     private fun fetchUsernames(userIds: Set<String>, messages: MutableList<Message>) {
         val usernameMap = HashMap<String, String>()
 

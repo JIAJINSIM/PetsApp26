@@ -32,8 +32,11 @@ class Contacts : Fragment() {
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
     private lateinit var userId: String
 
+
+
     fun setUserId(userId: String) {
         this.userId = userId
+
     }
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -199,6 +202,7 @@ class Contacts : Fragment() {
         // For demonstration, we'll return false to simulate no existing conversation
         return false
     }
+
     companion object {
         @JvmStatic
         fun newInstance(param1: String, param2: String) =
