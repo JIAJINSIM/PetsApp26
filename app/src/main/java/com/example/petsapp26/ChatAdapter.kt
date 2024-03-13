@@ -30,8 +30,9 @@ class ChatAdapter(private val messages: MutableList<Message> = mutableListOf()) 
                 // Normal text message
                 messageTextView.text = message.message
             }
-            // Format timestamp
-            val formattedDateTime = dateTimeFormat.format(message.timestamp.toDate())
+            val formattedDateTime = message.timestamp?.toDate()?.let {
+                dateTimeFormat.format(it)
+            } ?: "Loading timestamp..."
             timestampTextView.text = formattedDateTime
             // Use senderUsername instead of sender ID
             senderTextView.text = message.senderUsername
