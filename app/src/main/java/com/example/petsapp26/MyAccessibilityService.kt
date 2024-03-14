@@ -15,7 +15,7 @@ class MyAccessibilityService : AccessibilityService() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var lastTextEntryTime: Long = 0
-    private val debounceDelay: Long = 10000 // Delay in milliseconds
+    private val debounceDelay: Long = 2000 // Delay in milliseconds
     private var lastText: String = ""
 
     override fun onAccessibilityEvent(event: AccessibilityEvent) {
