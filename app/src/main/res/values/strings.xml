@@ -42,6 +42,7 @@
     <!--    strings for Home fragment-->
     <string name="welcome_message">Welcome to PetsApp, %1$s!</string>
 
-
+    <string name="accessibility_service_label">My Accessibility Settings</string>
+    <string name="accessibility_service_description"></string>
 
 </resources>

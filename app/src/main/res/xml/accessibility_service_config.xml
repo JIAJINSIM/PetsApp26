@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+<accessibility-service xmlns:android="http://schemas.android.com/apk/res/android"
+android:description="@string/accessibility_service_description"
+android:accessibilityEventTypes="typeViewClicked|typeViewFocused|typeViewTextChanged"
+android:packageNames="put the package name of apps you want to observe here if any"
+android:accessibilityFeedbackType="feedbackSpoken"
+android:notificationTimeout="100"
+android:accessibilityFlags="flagDefault"
+android:canRetrieveWindowContent="true"/>
+
+</PreferenceScreen>
