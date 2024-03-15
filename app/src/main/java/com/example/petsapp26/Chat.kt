@@ -36,6 +36,7 @@ import com.google.android.gms.location.LocationSettingsResponse
 import com.google.android.gms.location.SettingsClient
 import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.DocumentChange
+import com.google.firebase.firestore.Query
 
 
 data class Message(
@@ -85,7 +86,7 @@ class Chat : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         recyclerView = view.findViewById(R.id.recyclerView) // Initialization moved here
-        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.layoutManager = LinearLayoutManager(requireContext()).apply { stackFromEnd= true }
         adapter = ChatAdapter()
         recyclerView.adapter = adapter
         // Initialize FusedLocationProviderClient
@@ -340,7 +341,7 @@ class Chat : Fragment() {
         firestore.collection("chats")
             .whereIn("sender", listOf(currentUserId, selectedUserId))
             .whereIn("receiver", listOf(currentUserId, selectedUserId))
-            .orderBy("timestamp")
+            .orderBy("timestamp", Query.Direction.ASCENDING)
             .addSnapshotListener { snapshots, e ->
                 if (e != null) {
                     Log.w(TAG, "Listen failed.", e)
