@@ -58,38 +58,26 @@ class AddApptFragment : Fragment() {
             }
     }
 
-    class VetAdapter(context: Context, vets: List<Vet>) :
-        ArrayAdapter<Vet>(context, 0, vets) {
-
-        override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-            var listItemView = convertView
-            if (listItemView == null) {
-                listItemView = LayoutInflater.from(context).inflate(R.layout.list_item_bookclinics, parent, false)
+    fun updateListView(vetsList: List<Vet>) {
+        val adapter = VetAdapter(requireContext(), vetsList) { selectedVet ->
+            // Handle click here
+            val scheduleFragment = ScheduleApptFragment().apply {
+                arguments = Bundle().apply {
+                    // Assuming ScheduleApptFragment can handle a vet's name as a simple example
+                    putString("vetName", selectedVet.name)
+                }
             }
 
-            val currentVet = getItem(position)
-
-            val nameTextView = listItemView?.findViewById<TextView>(R.id.clinic_nameList)
-            val locationTextView = listItemView?.findViewById<TextView>(R.id.clinic_locList)
-            val ratingTextView = listItemView?.findViewById<TextView>(R.id.clinic_ratingsList)
-            val servicesTextView = listItemView?.findViewById<TextView>(R.id.clinic_servicesList)
-
-            nameTextView?.text = currentVet?.name
-            locationTextView?.text = "Area: ${currentVet?.location}"
-            ratingTextView?.text = "Rating: ${currentVet?.rating}"
-            servicesTextView?.text = "Services: ${currentVet?.services?.joinToString(", ")}"
-
-            return listItemView!!
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, scheduleFragment)
+                .addToBackStack(null) // This is optional.
+                .commit()
         }
+        // Make sure listView is initialized here
+        view?.findViewById<ListView>(R.id.clinics_list_view)?.adapter = adapter
     }
 
-    fun updateListView(vetsList: List<Vet>) {
-        val adapter = VetAdapter(requireContext(), vetsList)
-        val listView: ListView? = view?.findViewById(R.id.clinics_list_view)
-        listView!!.adapter = adapter
-    }
+
 
 
 }
-
-// Assuming VetClinicAdapter is similar to the custom adapter described earlier
