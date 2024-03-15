@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="8dp">
+
+    <TextView
+        android:id="@+id/clinic_nameList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="8dp"
+        android:fontFamily="serif"
+        android:text="Item 1"
+        android:textAppearance="?android:attr/textAppearanceListItem"
+        android:textColor="#3F51B5"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:id="@+id/clinic_servicesList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/clinic_nameList"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="6dp"
+        android:text="Services: "
+        android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+
+    <TextView
+        android:id="@+id/clinic_ratingsList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/clinic_servicesList"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="7dp"
+        android:text="Ratings: "
+        android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+
+    <TextView
+        android:id="@+id/clinic_locList"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/clinic_ratingsList"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="7dp"
+        android:text="Location: "
+        android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+
+
+    <Button
+        android:id="@+id/schedule_appointment_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/clinic_locList"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:fontFamily="serif"
+        android:text="Schedule" />
+
+</RelativeLayout>

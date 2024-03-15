@@ -110,17 +110,11 @@ class EditAppointmentFragment : Fragment() {
                     // Handling DocumentReference fields like 'custIDRef' and 'vetID'
                     custIDRef?.id?.let { custID ->
                         // Preload data into your UI components here
-                        // For EditText components, make sure you're doing this on the UI thread
-//                        view?.findViewById<EditText>(R.id.editTextTitle)?.setText(title ?: "")
                         view?.findViewById<EditText>(R.id.editTextDescription)?.setText(description ?: "")
 
                         view?.findViewById<TextView>(R.id.textCustomerID)?.text = custID
                         view?.findViewById<TextView>(R.id.editTextDate)?.text = formattedDate
                         view?.findViewById<TextView>(R.id.editTextTime)?.text = formattedTime
-//                        view?.findViewById<TextView>(R.id.spinnerVet)?.text = vetID
-
-                        // Convert Timestamp to a readable date format if necessary for 'date'
-                        // Handle 'vetID' similarly to 'custID'
                     }
 
                 } else {

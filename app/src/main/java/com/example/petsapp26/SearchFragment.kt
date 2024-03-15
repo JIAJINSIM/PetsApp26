@@ -65,13 +65,6 @@ class SearchFragment : Fragment() {
                 .commit()
         }
 
-        //searchButton.setOnClickListener {
-            //val queryText = searchEditText.text.toString().trim()
-            //if (queryText.isNotEmpty()) {
-                //searchForClinics(queryText)
-            //}
-        //}
-
         searchButton.setOnClickListener {
             searchForClinics()
         }
@@ -98,11 +91,6 @@ class SearchFragment : Fragment() {
 
         // Start building the query
         var query: Query = firestore.collection("veterinaries")
-
-        // Add conditions for name, area, and rating
-        //if (queryText.isNotEmpty()) {
-            //query = query.whereEqualTo("name", queryText)
-        //}
 
         if (queryText.isNotEmpty()) {
             val endText = queryText + "\uf8ff" // High code point character to ensure all subsequent characters are included

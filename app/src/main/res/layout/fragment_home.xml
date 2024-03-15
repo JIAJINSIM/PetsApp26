@@ -49,5 +49,24 @@
         android:gravity="center"
         android:layout_marginTop="32dp"
         android:textStyle="italic"/>
-</LinearLayout>
-    </RelativeLayout>
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="match_parent"
+        android:layout_height="53dp"
+        android:fontFamily="sans-serif-medium"
+        android:lineSpacingExtra="20sp"
+        android:text="BOOK AN APPOINTMENT NOW!"
+        android:textAlignment="center"
+        android:textColor="#7AAC41"
+        android:textSize="20sp"
+        android:textStyle="bold|italic" />
+
+        <Button
+            android:id="@+id/addappt_button"
+            android:layout_width="match_parent"
+            android:layout_height="68dp"
+            android:text="Book Now!" />
+
+    </LinearLayout>
+</RelativeLayout>
