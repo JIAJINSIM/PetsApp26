@@ -16,11 +16,17 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.drawable.Drawable
+import android.util.Log
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.FileOutputStream
 import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
+import com.bumptech.glide.request.transition.Transition
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import java.io.File
 import java.io.IOException
 
@@ -30,10 +36,10 @@ class Profile : Fragment() {
     private lateinit var documentIdTextView: TextView
     private var firestoreDocumentId: String? = null
 
+    private val storageReference = FirebaseStorage.getInstance().reference
     private lateinit var petImageAdapter: PetImageAdapter
 
     private val PICK_IMAGE_REQUEST = 1
-
     private val PICK_PET_IMAGE_REQUEST = 2
 
 
@@ -45,6 +51,7 @@ class Profile : Fragment() {
 
         profileImageView = view.findViewById(R.id.profileImage)
         usernameTextView = view.findViewById(R.id.tvUsername)
+
         // documentIdTextView = view.findViewById(R.id.tvUID)
         view.findViewById<Button>(R.id.changeProfileImageButton).setOnClickListener {
             openImageChooser()
@@ -63,6 +70,13 @@ class Profile : Fragment() {
         val sharedPreferences =
             activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         firestoreDocumentId = sharedPreferences?.getString("documentId", null)
+
+        val user = FirebaseAuth.getInstance().currentUser
+        if (user != null) {
+            Log.d("ProfileFragment", "User is signed in with UID: ${user.uid}")
+        } else {
+            Log.d("ProfileFragment", "No user is signed in.")
+        }
 
         val username = sharedPreferences?.getString("username", "No Username")
         val documentId = sharedPreferences?.getString("documentID", "No ID")
@@ -88,6 +102,7 @@ class Profile : Fragment() {
                 Toast.makeText(context, "Please log in to view profile details", Toast.LENGTH_SHORT)
                     .show()
             }
+
         }
 
 
@@ -122,13 +137,16 @@ class Profile : Fragment() {
                     profileImageView.setImageURI(imageUri)
 
                     firestoreDocumentId?.let { userId ->
-                        saveImageToInternalStorage(imageUri, userId)
+                        Log.d("ProfileFragment", "Authenticated user ID: $userId")
+                        uploadImageToFirebaseStorage(imageUri, userId, "profilePic.jpg", false)
                     }
                 }
                 PICK_PET_IMAGE_REQUEST -> {
                     var imageUri: Uri = data.data!!
+                    val timestamp = System.currentTimeMillis()
                     firestoreDocumentId?.let { userId ->
-                        savePetImageToInternalStorage(imageUri, userId)
+                        Log.d("ProfileFragment", "Authenticated user ID: $userId")
+                        uploadImageToFirebaseStorage(imageUri, userId, "pet_$timestamp.jpg", true)
                     }
                 }
             }
@@ -136,59 +154,60 @@ class Profile : Fragment() {
         }
     }
 
-    private fun saveImageToInternalStorage(imageUri: Uri, userId: String) {
-        val inputStream = activity?.contentResolver?.openInputStream(imageUri)
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream?.close()
+    // New method to upload image to Firebase Storage
+    private fun uploadImageToFirebaseStorage(imageUri: Uri, userId: String, fileName: String, isPetImage: Boolean) {
+        val imageRef = storageReference.child("users/$userId/$fileName")
+        imageRef.putFile(imageUri)
+            .addOnSuccessListener {
+                Toast.makeText(activity, "Image uploaded successfully", Toast.LENGTH_SHORT).show()
+                imageRef.downloadUrl.addOnSuccessListener { uri ->
+                    if (isPetImage) {
+                        updatePetImages(uri.toString(), userId)
+                    } else {
+                        updateImageUrl(uri.toString(), userId)
+                    }
 
-        val directory = ContextWrapper(activity).getDir("profile", Context.MODE_PRIVATE)
-        val mypath = File(directory, "${userId}_profilePic.jpg")
-
-        var fos: FileOutputStream? = null
-        try {
-            fos = FileOutputStream(mypath)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            try {
-                fos?.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
+                }
             }
-        }
-        Toast.makeText(activity, "Image Saved to Internal Storage", Toast.LENGTH_SHORT).show()
+            .addOnFailureListener { exception ->
+                Log.e("ProfileFragment", "Upload failed", exception)
+                Toast.makeText(activity, "Upload failed", Toast.LENGTH_SHORT).show()
+            }
     }
 
-    private fun savePetImageToInternalStorage(imageUri: Uri, userId: String) {
-        val inputStream = activity?.contentResolver?.openInputStream(imageUri)
-        val bitmap = BitmapFactory.decodeStream(inputStream)
-        inputStream?.close()
-
-        val timestamp = System.currentTimeMillis()
-        val directory = ContextWrapper(activity).getDir("petDetails", Context.MODE_PRIVATE)
-
-        val fileName = "${userId}_pet_$timestamp.jpg"
-        val mypath = File(directory, fileName)
-
-        var fos: FileOutputStream? = null
-        try {
-            fos = FileOutputStream(mypath)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        } finally {
-            try {
-                fos?.close()
-            } catch (e: IOException) {
-                e.printStackTrace()
+    // Method to update the image URL in the user's profile (this may require adjusting depending on your app's Firestore structure)
+    private fun updateImageUrl(imageUrl: String, userId: String) {
+        // Assuming 'users' is a collection of user profiles
+        val userDocRef = FirebaseFirestore.getInstance().collection("users").document(userId)
+        userDocRef.update("profileImageUrl", imageUrl)
+            .addOnSuccessListener {
+                // Optionally, load the new image into the ImageView using Glide
+                Glide.with(this).load(imageUrl).into(profileImageView)
+                Toast.makeText(context, "Profile image updated.", Toast.LENGTH_SHORT).show()
             }
-        }
-        Toast.makeText(activity, "Pet Image Saved to Internal Storage", Toast.LENGTH_SHORT).show()
-
-        // After saving, reload the RecyclerView to display the new image
-        loadAndDisplayPetImages(userId)
+            .addOnFailureListener { e ->
+                Toast.makeText(context, "Failed to update image URL: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
     }
+
+    // Call this method after uploading pet image
+    private fun updatePetImages(imageUrl: String, userId: String) {
+        // Update the RecyclerView with the new image
+        // Assuming you have a method to convert imageUrl to Bitmap or similar
+        // For example, you can use Glide to download the image and convert it to a Bitmap
+        Glide.with(this).asBitmap().load(imageUrl).into(object : CustomTarget<Bitmap>() {
+            override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                // Add to your adapter's data set
+                petImageAdapter.addImage(resource)
+            }
+
+            override fun onLoadCleared(placeholder: Drawable?) {
+                // This is called when ImageView is cleared, if you are using placeholders, etc.
+            }
+        })
+    }
+
+
     private fun loadUserProfile(documentId: String) {
         val userDocRef = FirebaseFirestore.getInstance().collection("users").document(documentId)
 
@@ -223,29 +242,6 @@ class Profile : Fragment() {
         }
     }
 
-//    private fun loadAndDisplayPetImages(userId: String) {
-//        // Make sure the directory name is the same as the one used in savePetImageToInternalStorage
-//        val directory = ContextWrapper(activity).getDir("petDetails", Context.MODE_PRIVATE)
-//        val petImageFiles = directory.listFiles()?.filter { it.name.startsWith(userId) }?.toMutableList() ?: mutableListOf()
-//        val petImages = petImageFiles.map { BitmapFactory.decodeFile(it.absolutePath) }.toMutableList()
-//
-//
-//        petImageFiles?.forEach { file ->
-//            if (file.name.startsWith(userId)) {
-//                val bitmap = BitmapFactory.decodeFile(file.absolutePath)
-//                petImages.add(bitmap)
-//            }
-//        }
-//
-//        petImageAdapter = PetImageAdapter(petImages) { position ->
-//            deleteImage(position)
-//
-//        }
-//
-//        val recyclerView = view?.findViewById<RecyclerView>(R.id.rvPetImages)
-//        recyclerView?.adapter = petImageAdapter
-//        recyclerView?.layoutManager = GridLayoutManager(context, 3)
-//    }
 
     private fun loadAndDisplayPetImages(userId: String) {
         val directory = ContextWrapper(requireActivity()).getDir("petDetails", Context.MODE_PRIVATE)
@@ -312,6 +308,12 @@ class Profile : Fragment() {
             petImages.addAll(newPetImages)
             notifyDataSetChanged()
         }
+
+        fun addImage(bitmap: Bitmap) {
+            petImages.add(bitmap)
+            notifyItemInserted(petImages.size - 1)
+        }
     }
+
 
 }

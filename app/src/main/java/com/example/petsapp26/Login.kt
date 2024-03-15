@@ -15,6 +15,7 @@ import com.google.firebase.auth.FirebaseAuth
 
 import com.example.petsapp26.databinding.FragmentLoginBinding
 import com.google.firebase.firestore.FirebaseFirestore
+import java.security.MessageDigest
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -75,8 +76,18 @@ class Login : Fragment() {
             .whereEqualTo("username", username)
             .get()
             .addOnSuccessListener { documents ->
+
+                if (documents.isEmpty) {
+                    // Handle case where no user is found
+                    Toast.makeText(requireContext(), "User not found", Toast.LENGTH_SHORT).show()
+                    return@addOnSuccessListener
+                }
+
                 for (document in documents) {
-                    val storedPassword = document.getString("password")
+
+                    val storedHashedPassword = document.getString("password")
+                    val inputHashedPassword = hashPassword(password) // Hash the input password
+                    //val storedPassword = document.getString("password")
                     val uid = document.getString("uid")
                     val username = document.getString("username")
                     // Inside your login success block
@@ -84,7 +95,7 @@ class Login : Fragment() {
                     val role = document.getString("role")
 
 
-                    if (storedPassword == password) {
+                    if (storedHashedPassword == inputHashedPassword) {
 
                         val editor = activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)?.edit()
                         //editor?.putString("userID", userId)
@@ -175,6 +186,13 @@ class Login : Fragment() {
         super.onDestroyView()
         _binding = null
     }
+
+    fun hashPassword(password: String): String {
+        val bytes = password.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        return digest.fold("", { str, it -> str + "%02x".format(it) })
+    }
 }
 
 /*class Login : Fragment() {
@@ -226,6 +244,8 @@ class Login : Fragment() {
         val mainActivity = activity as? MainActivity
         mainActivity?.enableNavigationDrawer()
     }
+
+
 
 
 }*/

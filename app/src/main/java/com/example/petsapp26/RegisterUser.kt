@@ -11,6 +11,7 @@ import com.example.petsapp26.databinding.FragmentRegisterBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import java.util.UUID
+import java.security.MessageDigest
 
 class RegisterUser : Fragment() {
 
@@ -100,6 +101,9 @@ class RegisterUser : Fragment() {
     }
 
     private fun registerUser(username: String, password: String, role: String) {
+
+        val hashedPassword = hashPassword(password) // Hash the password
+
         // First, check if the username already exists
         val usersCollection = FirebaseFirestore.getInstance().collection("users")
         usersCollection.whereEqualTo("username", username)
@@ -112,7 +116,7 @@ class RegisterUser : Fragment() {
                     val userData = hashMapOf(
                         "uid" to uid,
                         "username" to username,
-                        "password" to password,
+                        "password" to hashedPassword,
                         "role" to role
                     )
                     usersCollection.add(userData)
@@ -142,5 +146,12 @@ class RegisterUser : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    fun hashPassword(password: String): String {
+        val bytes = password.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        return digest.fold("", { str, it -> str + "%02x".format(it) })
     }
 }
