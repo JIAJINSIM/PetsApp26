@@ -1,12 +1,14 @@
 package com.example.petsapp26
 
 import android.content.Context
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.TextView
+import androidx.fragment.app.FragmentActivity
 
 class VetAdapter(context: Context, vets: List<Vet>, private val onScheduleClick: (Vet) -> Unit) :
     ArrayAdapter<Vet>(context, 0, vets) {
@@ -27,8 +29,19 @@ class VetAdapter(context: Context, vets: List<Vet>, private val onScheduleClick:
         servicesTextView.text = "Services: ${currentVet.services.joinToString(", ")}"
 
         scheduleButton.setOnClickListener {
-            onScheduleClick(currentVet)
+            val scheduleFragment = ScheduleApptFragment().apply {
+                arguments = Bundle().apply {
+                    putString("vetName", currentVet.name)
+                    putString("vetServices", currentVet.services.joinToString(", "))
+                    putString("vetRating", currentVet.rating.toString())
+                }
+            }
+            (context as FragmentActivity).supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, scheduleFragment)
+                .addToBackStack(null)
+                .commit()
         }
+
 
         return listItemView
     }
