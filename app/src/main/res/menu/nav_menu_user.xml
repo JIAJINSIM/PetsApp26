@@ -27,8 +27,8 @@
 
         <item
             android:id="@+id/nav_search"
-            android:icon="@drawable/baseline_settings_24"
-            android:title="Search"/>
+            android:icon="@drawable/baseline_location_pin_24"
+            android:title="Locations"/>
 
         <item
             android:id="@+id/nav_settings"
