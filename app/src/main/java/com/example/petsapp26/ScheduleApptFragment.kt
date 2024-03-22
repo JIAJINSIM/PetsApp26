@@ -2,6 +2,7 @@ package com.example.petsapp26
 
 import android.app.DatePickerDialog
 import android.app.TimePickerDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -12,6 +13,8 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Spinner
 import android.widget.TextView
+import android.widget.Toast
+import androidx.compose.material3.rememberTimePickerState
 import androidx.fragment.app.Fragment
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
@@ -27,25 +30,29 @@ class ScheduleApptFragment : Fragment() {
     private lateinit var submitBookingButton: Button
     private lateinit var additionalNotesEditText: EditText
     private lateinit var preferredVetSpinner: Spinner
+    //private lateinit var vetName: TextView
+
+    private val db = FirebaseFirestore.getInstance()
 
     // Fetch the current user's UID
 //    private val custID by lazy { FirebaseAuth.getInstance().currentUser?.uid ?: "" }
     private val custID = "logged-in-user-id"
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+
         return inflater.inflate(R.layout.fragment_scheduleappt, container, false)
+
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         setupDateAndTimePickers(view)
 
         arguments?.let { bundle ->
             val vetName = bundle.getString("vetName", "")
             val vetServices = bundle.getString("vetServices", "")
             val vetRating = bundle.getString("vetRating", "")
-
-
 
             view.findViewById<TextView>(R.id.vetName).text = vetName
             view.findViewById<TextView>(R.id.vetServices).text = "Services provided: $vetServices"
@@ -60,62 +67,116 @@ class ScheduleApptFragment : Fragment() {
         preferredVetSpinner = view.findViewById(R.id.preferredVetSpinner)
         submitBookingButton = view.findViewById(R.id.submitBookingButton)
         submitBookingButton.setOnClickListener {
+            val currentUserDocumentId = getCurrentUserDocumentId() // Get the current user's document ID.
+            val currentUsername = getCurrentUsername() // Get the current username.
+            if (currentUserDocumentId != null && currentUsername != null) {
+                submitAppointment(currentUserDocumentId, currentUsername)
+            } else {
+                Toast.makeText(activity, "User not logged in.", Toast.LENGTH_SHORT).show()
+            }
             Log.d("AuthCheck", "Current user: ${FirebaseAuth.getInstance().currentUser?.uid}")
-            submitAppointment()
+            //submitAppointment()
         }
+
 
     }
-    private fun submitAppointment() {
-        val currentUser = FirebaseAuth.getInstance().currentUser
-        val db = FirebaseFirestore.getInstance()
+    private fun submitAppointment(userDocumentId: String, username: String,) {
+        //val currentUser = FirebaseAuth.getInstance().currentUser
+        //val db = FirebaseFirestore.getInstance()
+        val preferredVet = preferredVetSpinner.selectedItem.toString()
+        val vetNameTextView = view?.findViewById<TextView>(R.id.vetName)
+        val dateString = datePickerEditText.text.toString()
+        val timeString = timePickerEditText.text.toString()
+        val description = additionalNotesEditText.text.toString().trim()
 
-        if (currentUser != null) {
-            val userId = currentUser.uid
 
-            // Fetch the user's username from Firestore
-            db.collection("users").document(userId).get()
-                .addOnSuccessListener { userDocument ->
-                    val username = userDocument.getString("username") ?: "Unknown User"
-
-                    val dateString = datePickerEditText.text.toString()
-                    val timeString = timePickerEditText.text.toString()
-                    val description = additionalNotesEditText.text.toString()
-
-                    // Assuming the SimpleDateFormat of your date and time pickers
-                    val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
-
-                    try {
-                        val date = sdf.parse("$dateString $timeString")
-                        val timestamp = Timestamp(date)
-
-                        // Create a new appointment map including the title field
-                        val appointment = hashMapOf(
-                            "custID" to db.document("users/$userId"),
-                            "date" to timestamp,
-                            "description" to description,
-                            "title" to username // Set title to the username
-                        )
-
-                        // Add a new document with a generated ID
-                        db.collection("Appointments")
-                            .add(appointment)
-                            .addOnSuccessListener { documentReference ->
-                                Log.d("SubmitAppointment", "DocumentSnapshot added with ID: ${documentReference.id}")
-                                // Navigate the user away from this page or clear the form here.
-                            }
-                            .addOnFailureListener { e ->
-                                Log.w("SubmitAppointment", "Error adding document", e)
-                            }
-                    } catch (e: Exception) {
-                        Log.e("SubmitAppointment", "Error parsing date/time", e)
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    Log.e("SubmitAppointment", "Error fetching user document: ", exception)
-                }
-        } else {
-            Log.e("SubmitAppointment", "No logged in user found")
+        if (dateString.isEmpty() || timeString.isEmpty()) {
+            Toast.makeText(activity, "Please fill all fields", Toast.LENGTH_SHORT).show()
+            return
         }
+
+        val appointment = hashMapOf(
+            "Veterinarian Name" to preferredVet,
+            "Vet Name" to vetNameTextView?.text.toString(),
+            "UserID" to userDocumentId, // Include the user's document ID.
+            "Username" to username, // Include the username.
+            "Date" to dateString,
+            "Time" to timeString,
+            "Description" to description,
+        )
+
+        db.collection("Appointments")
+            .document(userDocumentId)
+            .set(appointment)
+            .addOnSuccessListener {
+                Toast.makeText(activity, "Appointment is made successfully", Toast.LENGTH_SHORT)
+                    .show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(
+                    activity,
+                    "Error saving Appointment: ${e.localizedMessage}",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+
+//        if (currentUser != null) {
+//            val userId = currentUser.uid
+//
+//
+//            // Fetch the user's username from Firestore
+//            db.collection("users").document(userId).get()
+//                .addOnSuccessListener { userDocument ->
+//                    val username = userDocument.getString("username") ?: "Unknown User"
+//
+//                    val dateString = datePickerEditText.text.toString()
+//                    val timeString = timePickerEditText.text.toString()
+//                    val description = additionalNotesEditText.text.toString()
+//
+//                    // Assuming the SimpleDateFormat of your date and time pickers
+//                    val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault())
+//
+//                    try {
+//                        val date = sdf.parse("$dateString $timeString")
+//                        val timestamp = Timestamp(date)
+//
+//                        // Create a new appointment map including the title field
+//                        val appointment = hashMapOf(
+//                            "ownerDocumentId" to userDocumentId,
+//                            "ownerUsername" to username,
+//                            "custID" to db.document("users/$userId"),
+//                            "date" to timestamp,
+//                            "description" to description,
+//                            "title" to username // Set title to the username
+//                        )
+//
+//                        // Add a new document with a generated ID
+//                        db.collection("Appointments")
+//                            .add(appointment)
+//                            .addOnSuccessListener { documentReference ->
+//                                Log.d("SubmitAppointment", "DocumentSnapshot added with ID: ${documentReference.id}")
+//                                // Navigate the user away from this page or clear the form here.
+//                                Toast.makeText(activity, "Appointment made successfully", Toast.LENGTH_SHORT)
+//                                    .show()
+//                            }
+//                            .addOnFailureListener { e ->
+//                                Log.w("SubmitAppointment", "Error adding document", e)
+//                                Toast.makeText(
+//                                    activity,
+//                                    "Error saving appointment: ${e.localizedMessage}",
+//                                    Toast.LENGTH_SHORT
+//                                ).show()
+//                            }
+//                    } catch (e: Exception) {
+//                        Log.e("SubmitAppointment", "Error parsing date/time", e)
+//                    }
+//                }
+//                .addOnFailureListener { exception ->
+//                    Log.e("SubmitAppointment", "Error fetching user document: ", exception)
+//                }
+//        } else {
+//            Log.e("SubmitAppointment", "No logged in user found")
+//        }
     }
 
     private fun setupDateAndTimePickers(view: View) {
@@ -184,6 +245,18 @@ class ScheduleApptFragment : Fragment() {
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, teamMembersNames)
         val spinner: Spinner = requireView().findViewById(R.id.preferredVetSpinner)
         spinner.adapter = adapter
+    }
+
+    private fun getCurrentUsername(): String? {
+        // Retrieve the current username from SharedPreferences.
+        val prefs = activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        return prefs?.getString("username", null)
+    }
+
+    private fun getCurrentUserDocumentId(): String? {
+        // Retrieve the current user's document ID from SharedPreferences.
+        val prefs = activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        return prefs?.getString("documentId", null)
     }
 
 
