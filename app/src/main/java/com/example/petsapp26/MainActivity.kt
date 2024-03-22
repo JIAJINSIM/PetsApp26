@@ -176,6 +176,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .replace(R.id.fragment_container, ApptFragment()).commit()
             R.id.nav_records -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, RecordFragment()).commit()
+            R.id.nav_admin_home -> supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, AdminHomeFragment()).commit()
 
             R.id.nav_logout -> {
 
