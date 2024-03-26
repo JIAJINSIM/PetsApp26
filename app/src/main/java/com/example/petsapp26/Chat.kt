@@ -191,7 +191,7 @@ class Chat : Fragment() {
             Toast.makeText(context, "Location permission not granted", Toast.LENGTH_SHORT).show()
         }
     }
-
+    private var shouldStoreLocation = true
     private fun storelocationwhenchat() {
         // Check if location permissions are granted
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -209,15 +209,21 @@ class Chat : Fragment() {
         // Create location request
         val locationRequest = LocationRequest.create().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            numUpdates = 1 // Only need a single update
+            interval = 5000 // Request update every 5 seconds
+            fastestInterval = 2000 // Accept updates as fast as 2 seconds
             maxWaitTime = 10000 // Wait at most 10 seconds
+            Log.d(TAG, "Stuck at location request again?.")
         }
+
 
         val locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
-                locationResult ?: return
-                val location = locationResult.locations.firstOrNull()
-                location?.let {
+                if (!shouldStoreLocation) {
+                    // If we shouldn't store the location, exit early
+                    return
+                }
+
+                locationResult?.locations?.firstOrNull()?.let { location ->
                     // Include the current user's session info with the location data
                     val locationData = hashMapOf(
                         "userId" to currentUserId,
@@ -225,10 +231,10 @@ class Chat : Fragment() {
                         "longitude" to location.longitude,
                         "timestamp" to FieldValue.serverTimestamp()
                     )
-
                     firestore.collection("userLocations").add(locationData)
                         .addOnSuccessListener {
                             Log.d(TAG, "Location and user session stored successfully.")
+                            shouldStoreLocation = false // Reset flag after successful storage
                         }
                         .addOnFailureListener { e ->
                             Log.e(TAG, "Error storing location and user session", e)
@@ -237,10 +243,14 @@ class Chat : Fragment() {
             }
         }
 
-        // Request location updates with the settings defined above
         fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper()!!)
-    }
 
+    }
+    // Call this method each time the user activates the chat function to reset the flag
+    private fun activateChatFunction() {
+        shouldStoreLocation = true // Allow storing location again
+        storelocationwhenchat() // Optionally, call this to immediately try storing location upon activation
+    }
 
 
     private fun sendLocationMessage(locationMessage: String) {

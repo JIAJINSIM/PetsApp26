@@ -156,8 +156,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
             }
             R.id.nav_login -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, Login()).commit()
-            R.id.nav_chat -> supportFragmentManager.beginTransaction()
-                .replace(R.id.fragment_container, Chat(),"CHAT_FRAGMENT_TAG").commit()
+            //R.id.nav_chat -> supportFragmentManager.beginTransaction()
+                //.replace(R.id.fragment_container, Chat(),"CHAT_FRAGMENT_TAG").commit()
             R.id.nav_home -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, HomeFragment()).commit()
             R.id.nav_search -> supportFragmentManager.beginTransaction()
