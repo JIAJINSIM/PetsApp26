@@ -1,26 +1,40 @@
 package com.example.petsapp26
 
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.google.firebase.auth.FirebaseAuth
 
 
 
 import com.example.petsapp26.databinding.FragmentLoginBinding
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import java.security.MessageDigest
+import android.Manifest
+import android.location.Location
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
+lateinit var fusedLocationClient2: FusedLocationProviderClient
 
 /**
  * A simple [Fragment] subclass.
@@ -51,6 +65,7 @@ class Login : Fragment() {
         val registerLink = binding.registerLink
 
         binding.username.requestFocus()
+        fusedLocationClient2 = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         loginButton.setOnClickListener {
             val username = usernameEditText.text.toString()
@@ -140,7 +155,8 @@ class Login : Fragment() {
 
 
                         println("Username: $username, UID: $documentId, Password: $password")
-
+                        // Now, request for location updates
+                        requestLocationUpdates()
 
 
                         return@addOnSuccessListener
@@ -152,7 +168,57 @@ class Login : Fragment() {
                 Toast.makeText(requireContext(), "Login Error: ${exception.message}", Toast.LENGTH_SHORT).show()
             }
     }
+    private var shouldStoreLocation = true
+    private fun requestLocationUpdates() {
+        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Location permission not granted. Not storing location.")
+            return // Early return if no permission
+        }
+        // Assuming you have a way to get the current user's ID or username
+        val currentUserId = PreferencesUtil.getCurrentUserId(requireContext())
+        if (currentUserId == null) {
+            Log.d(TAG, "No current user session found. Not storing location.")
+            return // Early return if no user session
+        }
+        // Create location request
+        val locationRequest = LocationRequest.create().apply {
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            interval = 5000 // Request update every 5 seconds
+            fastestInterval = 2000 // Accept updates as fast as 2 seconds
+            maxWaitTime = 10000 // Wait at most 10 seconds
+            Log.d(TAG, "Stuck at location request again?.")
+        }
 
+        val locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                if (!shouldStoreLocation) {
+                    // If we shouldn't store the location, exit early
+                    return
+                }
+
+                locationResult?.locations?.firstOrNull()?.let { location ->
+                    // Include the current user's session info with the location data
+                    val locationData = hashMapOf(
+                        "userId" to currentUserId,
+                        "latitude" to location.latitude,
+                        "longitude" to location.longitude,
+                        "timestamp" to FieldValue.serverTimestamp()
+                    )
+                    firestore.collection("userLocations").add(locationData)
+                        .addOnSuccessListener {
+                            Log.d(TAG, "Location and user session stored successfully.")
+                            shouldStoreLocation = false // Reset flag after successful storage
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e(TAG, "Error storing location and user session", e)
+                        }
+                } ?: Log.d(TAG, "Unable to get location.")
+            }
+        }
+
+        fusedLocationClient2.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper()!!)
+
+    }
 
 //    private fun storeUserRole(documentId: String?, username: String?, role: String) {
 //        activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)?.edit()?.apply {
