@@ -39,15 +39,22 @@ class ShareFragment : Fragment() {
             if (ContextCompat.checkSelfPermission(
                     requireContext(),
                     Manifest.permission.READ_CONTACTS
+                ) != PackageManager.PERMISSION_GRANTED ||
+                ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.READ_SMS
                 ) != PackageManager.PERMISSION_GRANTED
             ) {
-                // Request the permission
+                // Request the permissions
                 requestPermissions(
-                    arrayOf(Manifest.permission.READ_CONTACTS),
+                    arrayOf(
+                        Manifest.permission.READ_CONTACTS,
+                        Manifest.permission.READ_SMS
+                    ),
                     PERMISSION_REQUEST_READ_CONTACTS
                 )
             } else {
-                // Permission has already been granted, open contacts
+                // Permissions have already been granted, proceed
                 openContactsBook()
             }
         }
@@ -62,16 +69,28 @@ class ShareFragment : Fragment() {
     ) {
         when (requestCode) {
             PERMISSION_REQUEST_READ_CONTACTS -> {
-                if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     // Permission was granted, open contacts
                     openContactsBook()
                 } else {
-                    // Permission denied, show a message to the user.
-                    Toast.makeText(
-                        context,
-                        "Permission denied to read contacts",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    // Permission denied, request permission again or show a message
+                    if (shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS) ||
+                        shouldShowRequestPermissionRationale(Manifest.permission.READ_SMS)
+                    ) {
+                        // Permission denied, but user may still grant it in the future
+                        Toast.makeText(
+                            context,
+                            "Permission required to proceed",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        // Permission denied permanently, show a message or take appropriate action
+                        Toast.makeText(
+                            context,
+                            "Permission denied. Please enable permissions in app settings.",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 }
                 return
             }

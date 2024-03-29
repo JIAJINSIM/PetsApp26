@@ -65,7 +65,6 @@ class Login : Fragment() {
         val registerLink = binding.registerLink
 
         binding.username.requestFocus()
-        fusedLocationClient2 = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         loginButton.setOnClickListener {
             val username = usernameEditText.text.toString()
@@ -80,6 +79,7 @@ class Login : Fragment() {
                 ?.addToBackStack(null)
                 ?.commit()
         }
+        fusedLocationClient2 = LocationServices.getFusedLocationProviderClient(requireActivity())
 
 
     }
