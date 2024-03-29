@@ -18,6 +18,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.util.Log
+import android.widget.ArrayAdapter
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.FileOutputStream
@@ -192,13 +193,12 @@ class Profile : Fragment() {
 
     // Call this method after uploading pet image
     private fun updatePetImages(imageUrl: String, userId: String) {
-        // Update the RecyclerView with the new image
-        // Assuming you have a method to convert imageUrl to Bitmap or similar
-        // For example, you can use Glide to download the image and convert it to a Bitmap
         Glide.with(this).asBitmap().load(imageUrl).into(object : CustomTarget<Bitmap>() {
             override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+
+                val petImage = PetImage(resource, imageUrl)
                 // Add to your adapter's data set
-                petImageAdapter.addImage(resource)
+                petImageAdapter.addImage(petImage)
             }
 
             override fun onLoadCleared(placeholder: Drawable?) {
@@ -209,6 +209,8 @@ class Profile : Fragment() {
 
 
     private fun loadUserProfile(documentId: String) {
+        Log.d("ProfileFragment", "Loading user profile for document ID: $documentId")
+
         val userDocRef = FirebaseFirestore.getInstance().collection("users").document(documentId)
 
         userDocRef.get()
@@ -217,6 +219,8 @@ class Profile : Fragment() {
                     val username = documentSnapshot.getString("username") ?: "Unknown"
                     val imageUrl = documentSnapshot.getString("profileImageUrl")
 
+                    Log.d("ProfileFragment", "User profile loaded successfully. Username: $username, Image URL: $imageUrl")
+
                     usernameTextView.text = "$username"
                     // documentIdTextView.text = "Document ID: $documentId"
 
@@ -224,14 +228,16 @@ class Profile : Fragment() {
                         Glide.with(this).load(url).into(profileImageView)
                     }
                 } else {
+                    Log.d("ProfileFragment", "Profile not found for document ID: $documentId")
                     Toast.makeText(context, "Profile not found.", Toast.LENGTH_SHORT).show()
                 }
             }
             .addOnFailureListener { e ->
-                Toast.makeText(context, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT)
-                    .show()
+                Log.e("ProfileFragment", "Error loading profile: ${e.message}", e)
+                Toast.makeText(context, "Error loading profile: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
+
 
     private fun loadImageFromInternalStorage(userId: String) {
         val directory = ContextWrapper(activity).getDir("profile", Context.MODE_PRIVATE)
@@ -244,33 +250,91 @@ class Profile : Fragment() {
 
 
     private fun loadAndDisplayPetImages(userId: String) {
-        val directory = ContextWrapper(requireActivity()).getDir("petDetails", Context.MODE_PRIVATE)
-        val petImageFiles = directory.listFiles()?.filter { it.name.startsWith(userId) }?.toList() ?: listOf()
-        val newPetImages = petImageFiles.map { BitmapFactory.decodeFile(it.absolutePath) }.toMutableList()
+        Log.d("ProfileFragment", "Loading and displaying pet images for user ID: $userId")
 
-        // Update the adapter's dataset
-        petImageAdapter.updatePetImages(newPetImages)
-    }
+        // Construct the storage reference for the user's images folder
+        val storageRef = FirebaseStorage.getInstance().reference.child("users/$userId")
 
-    private fun deleteImage(position: Int) {
+        // List all items (images) in the user's images folder
+        storageRef.listAll().addOnSuccessListener { listResult ->
+            val images = mutableListOf<PetImage>()
+            // Iterate through the items (images) in the folder
+            listResult.items.forEachIndexed { index, imageRef ->
+                // Get the download URL for each image
+                imageRef.downloadUrl.addOnSuccessListener { uri ->
+                    // Load the image using Glide
+                    Glide.with(this@Profile).asBitmap().load(uri).into(object : CustomTarget<Bitmap>() {
+                        override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                            // Log that the image was successfully loaded
+                            Log.d("ProfileFragment", "Pet image loaded successfully from URL: $uri")
 
-        val directory = ContextWrapper(activity).getDir("petDetails", Context.MODE_PRIVATE)
-        val files = directory.listFiles()
+                            val petImage = PetImage(resource, uri.toString())
+                            images.add(petImage)
 
-        // Check if the position is valid
-        if (position >= 0 && position < files.size) {
-            val fileToDelete = files[position]
-            if (fileToDelete.delete()) {
-                petImageAdapter.removeAt(position) // Call the new removeAt function
-            } else {
-                Toast.makeText(activity, "Unable to delete image", Toast.LENGTH_SHORT).show()
+                            // Check if all images have been loaded
+                            if (index == listResult.items.size - 1) {
+                                // All images have been loaded, update the adapter with the list of images
+                                petImageAdapter.updatePetImages(images)
+                            }
+                        }
+
+                        override fun onLoadCleared(placeholder: Drawable?) {
+                            // Log that the image load was cleared
+                            Log.d("ProfileFragment", "Pet image load cleared for URL: $uri")
+                        }
+                    })
+                }
             }
+        }.addOnFailureListener { exception ->
+            // Log any errors that occur while listing images
+            Log.e("ProfileFragment", "Error listing pet images: ${exception.message}", exception)
         }
     }
 
 
+
+
+//    private fun deleteImage(position: Int) {
+//
+//        val directory = ContextWrapper(activity).getDir("petDetails", Context.MODE_PRIVATE)
+//        val files = directory.listFiles()
+//
+//        // Check if the position is valid
+//        if (position >= 0 && position < files.size) {
+//            val fileToDelete = files[position]
+//            if (fileToDelete.delete()) {
+//                petImageAdapter.removeAt(position) // Call the new removeAt function
+//            } else {
+//                Toast.makeText(activity, "Unable to delete image", Toast.LENGTH_SHORT).show()
+//            }
+//        }
+//    }
+
+
+    private fun deleteImage(position: Int) {
+        if (position < 0 || position >= petImageAdapter.itemCount) {
+            Toast.makeText(activity, "Invalid image position", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val imagePath = petImageAdapter.getImagePathAt(position)
+        val imageRef = FirebaseStorage.getInstance().getReferenceFromUrl(imagePath)
+
+        imageRef.delete().addOnSuccessListener {
+            // Image successfully deleted from Firebase Storage
+            petImageAdapter.removeAt(position)
+            Toast.makeText(activity, "Image deleted successfully", Toast.LENGTH_SHORT).show()
+        }.addOnFailureListener { exception ->
+            Toast.makeText(activity, "Failed to delete image: ${exception.message}", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
+    data class PetImage(val bitmap: Bitmap, val imagePath: String)
+
+
     class PetImageAdapter(
-        private var petImages: MutableList<Bitmap>,
+        private var petImages: MutableList<PetImage>,
         private val onDeleteClick: (Int) -> Unit) :
         RecyclerView.Adapter<PetImageAdapter.PetImageViewHolder>() {
 
@@ -285,7 +349,8 @@ class Profile : Fragment() {
         }
 
         override fun onBindViewHolder(holder: PetImageViewHolder, position: Int) {
-            holder.petImageView.setImageBitmap(petImages[position])
+            val petImage = petImages[position]
+            holder.petImageView.setImageBitmap(petImage.bitmap) // Use the bitmap property from PetImage
             holder.deleteImageView.setOnClickListener {
                 onDeleteClick(position)
             }
@@ -303,14 +368,19 @@ class Profile : Fragment() {
             }
         }
 
-        fun updatePetImages(newPetImages: MutableList<Bitmap>) {
+        fun getImagePathAt(position: Int): String {
+            return petImages[position].imagePath
+        }
+
+
+        fun updatePetImages(newPetImages: MutableList<PetImage>) {
             petImages.clear()
             petImages.addAll(newPetImages)
             notifyDataSetChanged()
         }
 
-        fun addImage(bitmap: Bitmap) {
-            petImages.add(bitmap)
+        fun addImage(petImage: PetImage) {
+            petImages.add(petImage)
             notifyItemInserted(petImages.size - 1)
         }
     }
