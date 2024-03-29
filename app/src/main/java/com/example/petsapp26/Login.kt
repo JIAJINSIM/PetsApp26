@@ -138,8 +138,9 @@ class Login : Fragment() {
                         enableNavigationDrawer()
 
 
-                        val userId = document.id
+                        val userId = document.getString("uid") ?: document.id
                         PreferencesUtil.storeUserIdInPreferences(userId, requireContext()) // Store user ID in preferences
+                        Log.d("debug", "loginuid:" + userId)
                         // Fetch user document ID and log it
                         // val userId = document.id
                         // Log.d("LoginFragment", "User ID: $userId")

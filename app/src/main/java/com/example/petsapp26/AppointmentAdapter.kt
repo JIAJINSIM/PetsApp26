@@ -19,17 +19,15 @@ class AppointmentAdapter(context: Context, private val appointments: List<Appoin
         val itemDescription = view.findViewById<TextView>(R.id.item_description)
         val deleteButton = view.findViewById<Button>(R.id.delete_appointment_button)
         val editButton = view.findViewById<Button>(R.id.edit_appointment_button)
+
+        itemName.text = appointment?.Username
+        itemDescription.text = appointment?.Description
+
         editButton.setOnClickListener {
             appointment?.let { it1 -> listener?.onEditAppointment(it1) }
         }
 
-        itemName.text = appointment?.title
-        itemDescription.text = "Description ID: ${appointment?.description}"
-
         deleteButton.setOnClickListener { appointment?.let { it1 -> listener.deleteAppointment(it1) } }
-
-
-
 
         return view
     }
