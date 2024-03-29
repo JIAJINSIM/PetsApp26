@@ -1,9 +1,14 @@
 package com.example.petsapp26
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.EditText
@@ -22,7 +27,12 @@ class SearchFragment : Fragment() {
     private lateinit var vetClinicAdaptor: VetClinicAdaptor
     private lateinit var areaSpinner: Spinner
     private lateinit var ratingSpinner: Spinner
+    private lateinit var servicesSpinner: Spinner
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+    private val searchHandler = Handler(Looper.getMainLooper())
+    private val searchRunnable = Runnable {
+        searchForClinics()
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(R.layout.fragment_search, container, false)
@@ -38,6 +48,7 @@ class SearchFragment : Fragment() {
 
         setupAreaSpinner(view)
         setupRatingSpinner(view)
+        setupServicesSpinner(view)
 
         // Fetch and display all clinics
         fetchAllClinics()
@@ -65,6 +76,23 @@ class SearchFragment : Fragment() {
                 .commit()
         }
 
+        searchEditText.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+
+            override fun afterTextChanged(s: Editable?) {
+                searchHandler.removeCallbacks(searchRunnable) // Remove any pending searches
+
+                if (s != null && s.toString().trim().isNotEmpty()) {
+                    searchHandler.postDelayed(searchRunnable, 500) // Delay search for 500ms
+                } else {
+                    fetchAllClinics()
+                }
+            }
+        })
+
+
         searchButton.setOnClickListener {
             searchForClinics()
         }
@@ -75,6 +103,17 @@ class SearchFragment : Fragment() {
         val areaAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, areas)
         areaSpinner = view.findViewById(R.id.area_spinner) // This line initializes the areaSpinner
         areaSpinner.adapter = areaAdapter
+        areaSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (position != AdapterView.INVALID_POSITION) {
+                    searchForClinics()
+                } else {
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+            }
+        }
     }
 
     private fun setupRatingSpinner(view: View) {
@@ -82,12 +121,46 @@ class SearchFragment : Fragment() {
         val ratingAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, ratings)
         ratingSpinner = view.findViewById(R.id.rating_spinner)
         ratingSpinner.adapter = ratingAdapter
+        ratingSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (position != AdapterView.INVALID_POSITION) {
+                    searchForClinics()
+                } else {
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>) {
+            }
+        }
+    }
+
+    private fun setupServicesSpinner(view: View) {
+        // Define the service categories you need
+        val services = arrayOf("All Services", "Dental Care", "Emergency Care", "General Checkup", "Microchipping", "Neutering", "Surgery", "Vaccinations")
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        val servicesAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, services)
+        // Apply the adapter to the spinner
+        servicesSpinner = view.findViewById(R.id.services_spinner)
+        servicesSpinner.adapter = servicesAdapter
+        // Set the spinner onItemSelectedListener
+        servicesSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>, view: View?, position: Int, id: Long) {
+                if (position != AdapterView.INVALID_POSITION) {
+                    searchForClinics()
+                } else {
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>) {
+                // You can define what to do when nothing is selected if necessary
+            }
+        }
     }
 
     private fun searchForClinics() {
         val queryText = searchEditText.text.toString().trim()
         val selectedArea = areaSpinner.selectedItem.toString()
         val selectedRating = ratingSpinner.selectedItem.toString()
+        val selectedService = servicesSpinner.selectedItem.toString()
 
         // Start building the query
         var query: Query = firestore.collection("veterinaries")
@@ -104,6 +177,10 @@ class SearchFragment : Fragment() {
         if (selectedRating != "Any Rating") {
             val ratingValue = selectedRating.toDoubleOrNull() ?: 0.0
             query = query.whereEqualTo("rating", ratingValue)
+        }
+
+        if (selectedService != "All Services") {
+            query = query.whereArrayContains("services", selectedService)
         }
         // Execute the query
         query.get()

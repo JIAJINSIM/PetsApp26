@@ -14,31 +14,31 @@
         android:hint="Search Clinics"
         android:inputType="text" />
 
-    <Button
-        android:id="@+id/search_clinic_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="16dp"
-        android:text="Search" />
-
-    <ListView
-        android:id="@+id/clinic_list"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="@android:color/darker_gray"
-        android:dividerHeight="0.5dp" />
-
-    <Button
-        android:id="@+id/show_filters_button"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="16dp"
-        android:text="Other Filters" />
+        android:layout_marginTop="16dp">
+
+        <Button
+            android:id="@+id/search_clinic_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginEnd="30dp"
+            android:text="Search" />
+
+        <Button
+            android:id="@+id/show_filters_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Other Filters" />
+    </LinearLayout>
 
     <!-- Filters container -->
+
     <LinearLayout
         android:id="@+id/filters_container"
         android:layout_width="match_parent"
@@ -59,7 +59,22 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:prompt="@string/select_rating" />
+
+        <!-- Spinner for selecting a service -->
+        <Spinner
+            android:id="@+id/services_spinner"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:prompt="@string/select_rating" />
     </LinearLayout>
+
+    <ListView
+        android:id="@+id/clinic_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@android:color/darker_gray"
+        android:dividerHeight="0.5dp" />
 
 </LinearLayout>
 
