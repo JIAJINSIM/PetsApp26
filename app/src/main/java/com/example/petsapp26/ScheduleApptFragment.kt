@@ -38,6 +38,10 @@ class ScheduleApptFragment : Fragment() {
 //    private val custID by lazy { FirebaseAuth.getInstance().currentUser?.uid ?: "" }
     private val custID = "logged-in-user-id"
 
+    data class VetInfo(val name: String, val uid: String) {
+        override fun toString(): String = name
+    }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         return inflater.inflate(R.layout.fragment_scheduleappt, container, false)
@@ -88,6 +92,9 @@ class ScheduleApptFragment : Fragment() {
         val dateString = datePickerEditText.text.toString()
         val timeString = timePickerEditText.text.toString()
         val description = additionalNotesEditText.text.toString().trim()
+        val selectedVetInfo = preferredVetSpinner.selectedItem as VetInfo
+        val vetUID = selectedVetInfo.uid
+        val apptId = "appt_${System.currentTimeMillis()}"
 
 
         if (dateString.isEmpty() || timeString.isEmpty()) {
@@ -97,6 +104,7 @@ class ScheduleApptFragment : Fragment() {
 
         val appointment = hashMapOf(
             "Veterinarian Name" to preferredVet,
+            "Veterinarian UID" to vetUID,
             "Vet Name" to vetNameTextView?.text.toString(),
             "UserID" to userDocumentId, // Include the user's document ID.
             "Username" to username, // Include the username.
@@ -106,7 +114,7 @@ class ScheduleApptFragment : Fragment() {
         )
 
         db.collection("Appointments")
-            .document(userDocumentId)
+            .document(apptId)
             .set(appointment)
             .addOnSuccessListener {
                 Toast.makeText(activity, "Appointment is made successfully", Toast.LENGTH_SHORT)
@@ -233,7 +241,11 @@ class ScheduleApptFragment : Fragment() {
         db.collection("veterinaries").document(vetDocId).collection("teamMembers")
             .get()
             .addOnSuccessListener { documents ->
-                val teamMembersNames = documents.mapNotNull { it.getString("name") }
+                val teamMembersNames = documents.mapNotNull { document ->
+                    val name = document.getString("name")
+                    val uid = document.getString("uid")
+                    if (name != null) uid?.let { VetInfo(name, it) } else null
+                }
                 updateSpinnerWithTeamMembers(teamMembersNames)
             }
             .addOnFailureListener { exception ->
@@ -241,7 +253,7 @@ class ScheduleApptFragment : Fragment() {
             }
     }
 
-    private fun updateSpinnerWithTeamMembers(teamMembersNames: List<String>) {
+    private fun updateSpinnerWithTeamMembers(teamMembersNames: List<VetInfo>) {
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_dropdown_item, teamMembersNames)
         val spinner: Spinner = requireView().findViewById(R.id.preferredVetSpinner)
         spinner.adapter = adapter
