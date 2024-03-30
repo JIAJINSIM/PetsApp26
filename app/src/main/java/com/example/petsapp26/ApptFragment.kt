@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentReference
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.PropertyName
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -25,15 +26,21 @@ private const val ARG_PARAM2 = "param2"
  */
 
 data class Appointment(
-    var documentId: String? = null,
-    val Date: String? = null,
-    val Description: String? = null,
-    val Time: String? = null,
-    val UserID: String? = null,
-    val Username: String? = null,
-    val VetName: String? = null,
-    val VeterinarianName: String? = null,
-    val VeterinarianUID: String? = null
+    var documentId: String? = null, // Local document ID, not in Firestore
+    @PropertyName("Date") val Date: String? = null,
+    @PropertyName("Description") val Description: String? = null,
+    @PropertyName("Time") val Time: String? = null,
+    @PropertyName("UserID") val UserID: String? = null,
+    @PropertyName("Username") val Username: String? = null,
+    @get:PropertyName("Vet Name")
+    @set:PropertyName("Vet Name")
+    var VetName: String? = null,
+    @get:PropertyName("Veterinarian Name")
+    @set:PropertyName("Veterinarian Name")
+    var VeterinarianName: String? = null,
+    @get:PropertyName("Veterinarian UID")
+    @set:PropertyName("Veterinarian UID")
+    var VeterinarianUID: String? = null
 )
 
 

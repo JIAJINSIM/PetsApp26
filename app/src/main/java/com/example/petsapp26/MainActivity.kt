@@ -162,6 +162,8 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
                 .replace(R.id.fragment_container, HomeFragment()).commit()
             R.id.nav_search -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, SearchFragment()).commit()
+            R.id.nav_appts -> supportFragmentManager.beginTransaction()
+                .replace(R.id.fragment_container, UserApptFragment()).commit()
             R.id.nav_settings -> supportFragmentManager.beginTransaction()
                 .replace(R.id.fragment_container, SettingsFragment()).commit()
             R.id.nav_share -> supportFragmentManager.beginTransaction()

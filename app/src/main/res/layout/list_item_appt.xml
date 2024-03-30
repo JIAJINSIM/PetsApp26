@@ -22,12 +22,30 @@
         android:layout_marginTop="3dp"
         android:text="Sub Item 1"
         android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+    <TextView
+        android:id="@+id/item_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_description"
+        android:layout_marginTop="3dp"
+        android:text="Sub Item 2"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall" />
+
+    <TextView
+        android:id="@+id/item_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/item_date"
+        android:layout_marginTop="3dp"
+        android:text="Sub Item 3"
+        android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 
     <Button
         android:id="@+id/edit_appointment_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
         android:layout_marginEnd="10dp"
         android:text="Edit" />
 
@@ -36,6 +54,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
         android:layout_marginEnd="120dp"
         android:text="Delete" />
 
