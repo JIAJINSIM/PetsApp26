@@ -139,8 +139,10 @@ class Login : Fragment() {
 
 
                         val userId = document.getString("uid") ?: document.id
-                        PreferencesUtil.storeUserIdInPreferences(userId, requireContext()) // Store user ID in preferences
+                        val currentuserID = document.id
                         Log.d("debug", "loginuid:" + userId)
+                        PreferencesUtil.storeUserIdInPreferences(currentuserID, requireContext()) // Store user ID in preferences
+                        Log.d("debug", "currentuserID:" + currentuserID)
                         // Fetch user document ID and log it
                         // val userId = document.id
                         // Log.d("LoginFragment", "User ID: $userId")
