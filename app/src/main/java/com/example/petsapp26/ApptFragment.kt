@@ -61,7 +61,7 @@ data class Appointment(
             listView.adapter = adapter
 
             // Retrieve the current user ID from SharedPreferences
-            val userId = PreferencesUtil.getCurrentUserId(requireContext())
+            val userId = PreferencesUtil.getUID(requireContext())
             Log.d("tag", "Test" + userId)
 
             fetchAppointments(userId)
