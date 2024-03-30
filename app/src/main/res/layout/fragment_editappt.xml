@@ -21,18 +21,6 @@
             android:textSize="30sp"
             android:layout_centerInParent="true" />
 
-        <!-- Label for Customer -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Customer ID"
-            android:layout_marginTop="16dp"/>
-
-        <TextView
-            android:id="@+id/textCustomerID"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"/>
 
         <!-- Label for Date -->
         <TextView
@@ -63,17 +51,17 @@
             android:focusable="false"
             android:inputType="none" />
 
-        <!-- Label for Vet -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Veterinarian"
-            android:layout_marginTop="16dp"/>
+<!--        &lt;!&ndash; Label for Vet &ndash;&gt;-->
+<!--        <TextView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:text="Veterinarian"-->
+<!--            android:layout_marginTop="16dp"/>-->
 
-        <Spinner
-            android:id="@+id/spinnerVet"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+<!--        <Spinner-->
+<!--            android:id="@+id/spinnerVet"-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content" />-->
 
         <!-- Label for Description -->
         <TextView

@@ -75,6 +75,7 @@ class ScheduleApptFragment : Fragment() {
             val currentUsername = getCurrentUsername() // Get the current username.
             if (currentUserDocumentId != null && currentUsername != null) {
                 submitAppointment(currentUserDocumentId, currentUsername)
+                navigateToUserApptFragment()
             } else {
                 Toast.makeText(activity, "User not logged in.", Toast.LENGTH_SHORT).show()
             }
@@ -269,6 +270,20 @@ class ScheduleApptFragment : Fragment() {
         // Retrieve the current user's document ID from SharedPreferences.
         val prefs = activity?.getSharedPreferences("AppPreferences", Context.MODE_PRIVATE)
         return prefs?.getString("documentId", null)
+    }
+
+    private fun navigateToUserApptFragment() {
+        val fragmentManager = parentFragmentManager
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        val userApptFragment = UserApptFragment()
+
+        // Replace whatever is in the fragment_container view with this fragment,
+        // and add the transaction to the back stack so the user can navigate back
+        fragmentTransaction.replace(R.id.fragment_container, userApptFragment)
+        fragmentTransaction.addToBackStack(null)
+
+        // Commit the transaction
+        fragmentTransaction.commit()
     }
 
 

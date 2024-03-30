@@ -22,38 +22,68 @@ class AppointmentAdapter(
     ) : ArrayAdapter<Appointment>(context, 0, appointments) {
 
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-        val view = convertView ?: LayoutInflater.from(context).inflate(R.layout.list_item_appt, parent, false)
-        val appointment = getItem(position)
-
-        val itemName = view.findViewById<TextView>(R.id.item_name)
-        val itemDescription = view.findViewById<TextView>(R.id.item_description)
-        val itemDate = view.findViewById<TextView>(R.id.item_date)
-        val itemTime = view.findViewById<TextView>(R.id.item_time)
-        val deleteButton = view.findViewById<Button>(R.id.delete_appointment_button)
-        val editButton = view.findViewById<Button>(R.id.edit_appointment_button)
 
         when (mode) {
             AdapterMode.ADMIN -> {
+                val view = convertView ?: LayoutInflater.from(context)
+                    .inflate(R.layout.list_item_appt, parent, false)
+                val appointment = getItem(position)
+
+                val itemName = view.findViewById<TextView>(R.id.item_name)
+                val itemDescription = view.findViewById<TextView>(R.id.item_description)
+                val itemDate = view.findViewById<TextView>(R.id.item_date)
+                val itemTime = view.findViewById<TextView>(R.id.item_time)
+                val deleteButton = view.findViewById<Button>(R.id.delete_appointment_button)
+                val editButton = view.findViewById<Button>(R.id.edit_appointment_button)
+
                 itemName.text = appointment?.Username
                 itemDescription.text = appointment?.Description
                 itemDate.text = appointment?.Date
                 itemTime.text = appointment?.Time
+
+                editButton.setOnClickListener {
+                    appointment?.let { it1 -> listener?.onEditAppointment(it1) }
+                }
+
+                deleteButton.setOnClickListener {
+                    appointment?.let { it1 ->
+                        listener.deleteAppointment(
+                            it1
+                        )
+                    }
+                }
+
+                return view
+
             }
+
             AdapterMode.USER -> {
+                val view = convertView ?: LayoutInflater.from(context)
+                    .inflate(R.layout.list_item_appt_user, parent, false)
+                val appointment = getItem(position)
+
+                val itemName = view.findViewById<TextView>(R.id.item_name)
+                val itemDescription = view.findViewById<TextView>(R.id.item_description)
+                val itemDate = view.findViewById<TextView>(R.id.item_date)
+                val itemTime = view.findViewById<TextView>(R.id.item_time)
+                val deleteButton = view.findViewById<Button>(R.id.delete_appointment_button)
+
                 itemName.text = appointment?.Date
                 itemDescription.text = appointment?.Time
                 itemDate.text = appointment?.VetName
                 itemTime.text = appointment?.VeterinarianName
+
+                deleteButton.setOnClickListener {
+                    appointment?.let { it1 ->
+                        listener.deleteAppointment(
+                            it1
+                        )
+                    }
+                }
+
+                return view
             }
         }
-
-        editButton.setOnClickListener {
-            appointment?.let { it1 -> listener?.onEditAppointment(it1) }
-        }
-
-        deleteButton.setOnClickListener { appointment?.let { it1 -> listener.deleteAppointment(it1) } }
-
-        return view
     }
 
 }

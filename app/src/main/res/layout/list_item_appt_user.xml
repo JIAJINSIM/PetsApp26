@@ -41,16 +41,6 @@
         android:textAppearance="?android:attr/textAppearanceListItemSmall" />
 
     <Button
-        android:id="@+id/edit_appointment_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/item_time"
-        android:layout_alignParentStart="true"
-        android:text="Edit"
-        android:layout_marginStart="180dp"
-        android:layout_marginTop="8dp"/>
-
-    <Button
         android:id="@+id/delete_appointment_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
