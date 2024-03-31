@@ -39,14 +39,14 @@ class RegisterUser : Fragment() {
             android.R.layout.simple_spinner_item
         ).also { adapter ->
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-            binding.roleSpinner.adapter = adapter
+            //binding.roleSpinner.adapter = adapter
         }
 
         binding.register.setOnClickListener {
             val username = binding.username.text.toString().trim()
             val password = binding.password.text.toString().trim()
             val confirmPassword = binding.cfmPassword.text.toString().trim()
-            val role = binding.roleSpinner.selectedItem.toString()
+            val role = "user"
 
             if (validateForm(username, password, confirmPassword)) {
                 registerUser(username, password, role)
@@ -117,7 +117,7 @@ class RegisterUser : Fragment() {
                         "uid" to uid,
                         "username" to username,
                         "password" to hashedPassword,
-                        "role" to role
+                        "user" to role
                     )
                     usersCollection.add(userData)
                         .addOnSuccessListener {
