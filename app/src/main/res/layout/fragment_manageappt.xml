@@ -6,13 +6,6 @@
     android:padding="16dp"
     tools:context=".ApptFragment">
 
-    <!-- Search Bar for filtering appointments -->
-    <EditText
-        android:id="@+id/search_appointments"
-        android:layout_width="375dp"
-        android:layout_height="60dp"
-        android:hint="Search Appointments"
-        android:inputType="text" />
 
     <!-- Button to add a new appointment -->
 

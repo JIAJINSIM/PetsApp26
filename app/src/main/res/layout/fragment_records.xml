@@ -6,14 +6,6 @@
     android:padding="16dp"
     tools:context=".RecordFragment">
 
-    <!-- Search Bar for filtering records -->
-    <EditText
-        android:id="@+id/search_records"
-        android:layout_width="375dp"
-        android:layout_height="60dp"
-        android:hint="Search Records"
-        android:inputType="text" />
-
     <!-- Button to add a new appointment -->
 
     <!-- List to display appointments -->
