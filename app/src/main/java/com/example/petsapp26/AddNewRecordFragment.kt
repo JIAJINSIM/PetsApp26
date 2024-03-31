@@ -148,7 +148,7 @@ class AddNewRecordFragment : Fragment() {
 
     private fun fetchItemsFromFirebase() {
         val db = FirebaseFirestore.getInstance()
-        val items = mutableListOf("Select CustomerID")
+        val items = mutableListOf("Select Customer Name")
         val temp = mutableListOf("Select AppointmentID")
 
         // Query the "users" collection for documents where the role is "user"
@@ -159,7 +159,8 @@ class AddNewRecordFragment : Fragment() {
                 for (document in documents) {
                     // Get the document ID
                     val userId = document.id
-                    items.add(userId)
+                    val username = document.getString("username") ?: "Unknown"
+                    items.add(username)
                 }
                 if (items.isNotEmpty()) {
                     val adapter = CustomArrayAdapter(requireContext(), items)
