@@ -18,23 +18,23 @@
         android:textStyle="bold"
         android:layout_marginTop="100dp"/>
 
-    <TextView
-        android:id="@+id/role"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Role:"
-        android:textSize="18dp"
-        android:textStyle="bold"
-        />
+<!--    <TextView-->
+<!--        android:id="@+id/role"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="20dp"-->
+<!--        android:text="Role:"-->
+<!--        android:textSize="18dp"-->
+<!--        android:textStyle="bold"-->
+<!--        />-->
 
-    <Spinner
-        android:id="@+id/roleSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:backgroundTint="@color/lavender"
-        android:entries="@array/role_options"
-        android:spinnerMode="dropdown" />
+<!--    <Spinner-->
+<!--        android:id="@+id/roleSpinner"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:backgroundTint="@color/lavender"-->
+<!--        android:entries="@array/role_options"-->
+<!--        android:spinnerMode="dropdown" />-->
 
     <EditText
         android:id="@+id/username"
