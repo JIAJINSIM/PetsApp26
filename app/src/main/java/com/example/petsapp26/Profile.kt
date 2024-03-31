@@ -19,6 +19,7 @@ import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.util.Log
 import android.widget.ArrayAdapter
+import androidx.core.content.ContentResolverCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.io.FileOutputStream
@@ -132,9 +133,10 @@ class Profile : Fragment() {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (resultCode == Activity.RESULT_OK && data != null && data.data != null) {
+            val imageUri: Uri = data.data!!
             when(requestCode) {
                 PICK_IMAGE_REQUEST -> {
-                    val imageUri: Uri = data.data!!
+//                    val imageUri: Uri = data.data!!
                     profileImageView.setImageURI(imageUri)
 
                     firestoreDocumentId?.let { userId ->
@@ -143,15 +145,41 @@ class Profile : Fragment() {
                     }
                 }
                 PICK_PET_IMAGE_REQUEST -> {
-                    var imageUri: Uri = data.data!!
+//                    var imageUri: Uri = data.data!!
                     val timestamp = System.currentTimeMillis()
                     firestoreDocumentId?.let { userId ->
                         Log.d("ProfileFragment", "Authenticated user ID: $userId")
-                        uploadImageToFirebaseStorage(imageUri, userId, "pet_$timestamp.jpg", true)
+                        val bitmap = getBitmapFromUri(imageUri)
+                        bitmap?.let {
+                            uploadImageToFirebaseStorage(imageUri, userId, "pet_$timestamp.jpg", true)
+                        }?: run {
+                            Toast.makeText(activity, "Failed to get image from Gallery", Toast.LENGTH_SHORT).show()
+                        }
+
+
                     }
                 }
             }
 
+        }
+    }
+
+    private fun getBitmapFromUri(uri: Uri): Bitmap? {
+        return activity?.contentResolver?.let {
+            ContentResolverCompat.query(
+                it,
+                uri,
+                null,
+                null,
+                null,
+                null,
+                null
+            )?.use { cursor ->
+                if (cursor.moveToFirst()) {
+                    val inputStream = it.openInputStream(uri)
+                    BitmapFactory.decodeStream(inputStream)
+                } else null
+            }
         }
     }
 
