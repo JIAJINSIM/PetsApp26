@@ -17,64 +17,103 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Schedule your appointment with:"
-            android:textAppearance="?attr/textAppearanceListItem"
+            android:textAppearance="?android:attr/textAppearanceMedium"
             android:layout_marginBottom="16dp"/>
 
-        <!-- Dynamically populate these TextViews with vet details -->
+        <!-- Vet Name -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Vet Name:"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
         <TextView
             android:id="@+id/vetName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Vet Name"
             android:textAppearance="?attr/textAppearanceListItem"
             android:layout_marginBottom="8dp"/>
 
+        <!-- Services Offered -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Services Offered:"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
         <TextView
             android:id="@+id/vetServices"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Services Offered"
             android:textAppearance="?attr/textAppearanceListItem"
             android:layout_marginBottom="8dp"/>
 
+        <!-- Rating -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Rating:"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
         <TextView
             android:id="@+id/vetRating"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Rating"
             android:textAppearance="?attr/textAppearanceListItem"
             android:layout_marginBottom="16dp"/>
 
+        <!-- Preferred Vet -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Preferred Vet:"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
         <Spinner
             android:id="@+id/preferredVetSpinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"/>
 
+        <!-- Date Picker -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Date:"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
         <EditText
             android:id="@+id/datePicker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select Date"
+            android:hint="dd/mm/yyyy"
             android:focusable="false"
             android:layout_marginBottom="8dp"/>
 
+        <!-- Time Picker -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Select Time:"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
         <EditText
             android:id="@+id/timePicker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Select Time"
+            android:hint="HH:mm"
             android:focusable="false"
             android:layout_marginBottom="16dp"/>
 
+        <!-- Additional Notes -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Any additional notes:"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
         <EditText
             android:id="@+id/additionalNotes"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Any additional notes"
+            android:hint="Enter any additional information"
             android:inputType="textMultiLine"
             android:layout_marginBottom="16dp"/>
 
+        <!-- Submit Booking Button -->
         <Button
             android:id="@+id/submitBookingButton"
             android:layout_width="wrap_content"
